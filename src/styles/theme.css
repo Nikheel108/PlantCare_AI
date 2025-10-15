@@ -1,0 +1,23 @@
+:root {
+    /* Primary Colors */
+    --primary-green: #2D6A4F;
+    /* Deep forest green for primary actions */
+    --secondary-green: #40916C;
+    /* Softer green for secondary elements */
+
+    /* Accent Colors */
+    --accent-sage: #74C69D;
+    /* Light sage for highlights */
+    --accent-earth: #B7E4C7;
+    /* Pale earth tone for backgrounds */
+
+    /* UI Colors */
+    --white: #FFFFFF;
+    /* Clean white for cards */
+    --off-white: #F8FAF9;
+    /* Subtle background */
+    --text-dark: #1B4332;
+    /* Dark green-black for text */
+    --error: #D62828;
+    /* Red for errors/alerts */
+}

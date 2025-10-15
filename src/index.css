@@ -1,0 +1,225 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* PlantCareAI Design System - Modern Plant-themed UI */
+
+@layer base {
+  :root {
+    /* Core color palette - converted from hex to HSL */
+    --primary-green: 122 39% 49%; /* #4caf50 */
+    --secondary-green: 120 39% 64%; /* #81c784 */
+    --light-green: 120 52% 93%; /* #e8f5e9 */
+    --dark-green: 120 47% 34%; /* #2e7d32 */
+    --accent: 174 100% 37%; /* #00bfa5 */
+    
+    /* Background colors */
+    --primary-bg: 0 0% 100%; /* #ffffff */
+    --secondary-bg: 120 29% 97%; /* #f4fdf6 */
+    --dark-bg: 0 0% 7%; /* #121212 */
+    
+    /* Text colors */
+    --text-color: 0 0% 18%; /* #2e2e2e */
+    --text-light: 0 0% 40%; /* #666666 */
+    --text-dark: 0 0% 88%; /* #e0e0e0 */
+    
+    /* Design tokens */
+    --radius: 12px;
+    --shadow: 0 4px 10px rgba(0,0,0,0.1);
+    --font-main: 'Poppins', sans-serif;
+    
+    /* Enhanced shadows and effects */
+    --shadow-soft: 0 4px 10px rgba(0,0,0,0.1);
+    --shadow-card: 0 8px 25px rgba(0,0,0,0.08);
+    --shadow-glow: 0 0 30px hsla(var(--primary-green), 0.25);
+    
+    /* Gradients using the new color system */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary-green)), hsl(var(--secondary-green)));
+    --gradient-nature: linear-gradient(45deg, hsl(var(--dark-green)), hsl(var(--primary-green)));
+    --gradient-bg: linear-gradient(180deg, hsl(var(--primary-bg)), hsl(var(--secondary-bg)));
+    
+    /* Animation timings */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* Light mode mappings */
+    --background: var(--primary-bg);
+    --foreground: var(--text-color);
+    
+    /* Standard shadcn mappings using new design system */
+    --card: var(--secondary-bg);
+    --card-foreground: var(--text-color);
+
+    --popover: var(--secondary-bg);
+    --popover-foreground: var(--text-color);
+
+    --primary: var(--primary-green);
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: var(--light-green);
+    --secondary-foreground: var(--text-color);
+
+    --muted: var(--light-green);
+    --muted-foreground: var(--text-light);
+
+    --accent: var(--accent);
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 120 20% 85%;
+    --input: 120 20% 92%;
+    --ring: var(--primary-green);
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Dark mode using new design system */
+    --background: var(--dark-bg);
+    --foreground: var(--text-dark);
+    
+    /* Dark mode mappings */
+    --card: 0 0% 10%;
+    --card-foreground: var(--text-dark);
+    
+    --popover: 0 0% 10%;
+    --popover-foreground: var(--text-dark);
+    
+    --primary: var(--secondary-green);
+    --primary-foreground: var(--dark-bg);
+    
+    --secondary: 120 20% 15%;
+    --secondary-foreground: var(--text-dark);
+    
+    --muted: 120 15% 20%;
+    --muted-foreground: 0 0% 60%;
+    
+    --accent: var(--accent);
+    --accent-foreground: var(--dark-bg);
+    
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 120 15% 25%;
+    --input: 120 15% 20%;
+    --ring: var(--secondary-green);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-main);
+  }
+}
+
+@layer components {
+  /* Plant-themed component styles */
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .gradient-nature {
+    background: var(--gradient-nature);
+  }
+  
+  .gradient-bg {
+    background: var(--gradient-bg);
+  }
+  
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+  
+  .transition-bounce {
+    transition: var(--transition-bounce);
+  }
+  
+  /* Plant-themed animations */
+  .hover-lift {
+    @apply transition-smooth;
+    transform: translateY(0);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card);
+  }
+  
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px hsla(var(--primary-glow), 0.3);
+    }
+    50% {
+      box-shadow: 0 0 40px hsla(var(--primary-glow), 0.6);
+    }
+  }
+  
+  .fade-in {
+    animation: fade-in 0.6s ease-out;
+  }
+  
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .slide-up {
+    animation: slide-up 0.5s ease-out;
+  }
+  
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
