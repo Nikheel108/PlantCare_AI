@@ -46,21 +46,68 @@ export default function Chatbot() {
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
-      const prompt = `You are PlantCareAI, an expert plant care assistant. Your role is to help users with:
-- Plant care advice (watering, fertilizing, pruning)
-- Disease identification and treatment
-- Environmental conditions (light, humidity, temperature)
-- Repotting and propagation
-- General plant health questions
+      const prompt = `You are PlantCareAI. Format your responses EXACTLY like this example:
 
-Provide accurate, helpful, and concise advice. Be friendly and encouraging.
+📍 PROBLEM: [One-line title]
+
+CAUSES:
+1. **[Main Cause]**
+   • What: [Brief explanation in 5-7 words]
+   • Signs: [2-3 clear symptoms]
+
+2. **[Secondary Cause]**
+   • What: [Brief explanation in 5-7 words]
+   • Signs: [2-3 clear symptoms]
+
+SOLUTIONS:
+1. For [Main Cause]:
+   • Step 1: [Clear action in 5-7 words]
+   • Step 2: [Clear action in 5-7 words]
+
+2. For [Secondary Cause]:
+   • Step 1: [Clear action in 5-7 words]
+   • Step 2: [Clear action in 5-7 words]
+
+PREVENTION:
+• [One clear prevention tip]
+• [One clear prevention tip]
+
+💡 QUICK TIP: [One practical, memorable tip]
+
+-------------------
+
+For care instructions, use this format:
+
+📍 CARE GUIDE: [Topic]
+
+BASIC NEEDS:
+• Water: [Exact frequency and amount]
+• Light: [Specific requirement]
+• Temperature: [Exact range]
+
+STEP-BY-STEP:
+1. [First step in 5-7 words]
+2. [Second step in 5-7 words]
+3. [Third step in 5-7 words]
+
+IMPORTANT:
+❗ [One crucial warning or tip]
+✅ [One positive reminder]
+
+Use EXACTLY this formatting with:
+• Clear numbering
+• Emoji markers (📍,💡,❗,✅)
+• Section dividers (---)
+• Bold for key terms (**)
+• Short, clear points
+• Proper spacing between sections
 
 User question: ${userMessage}`;
 
       const result = await model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
-      
+
       return text || "I apologize, but I couldn't generate a response. Please try again.";
     } catch (error) {
       console.error('Gemini API Error:', error);
@@ -91,14 +138,14 @@ User question: ${userMessage}`;
 
     try {
       const responseText = await getGeminiResponse(currentMessage);
-      
+
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         text: responseText,
         sender: 'bot',
         timestamp: new Date()
       };
-      
+
       setMessages(prev => [...prev, botResponse]);
     } catch (error) {
       const errorResponse: Message = {
@@ -134,7 +181,7 @@ User question: ${userMessage}`;
   return (
     <div className="min-h-screen bg-gradient-bg">
       <Navbar />
-      
+
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 animate-fade-in">
           <h1 className="text-3xl font-bold text-foreground mb-2">
@@ -155,9 +202,9 @@ User question: ${userMessage}`;
                     <h3 className="font-semibold text-sm mb-1">Gemini API Key Required</h3>
                     <p className="text-xs text-muted-foreground mb-3">
                       Get your free API key from{" "}
-                      <a 
-                        href="https://makersuite.google.com/app/apikey" 
-                        target="_blank" 
+                      <a
+                        href="https://makersuite.google.com/app/apikey"
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary hover:underline"
                       >
@@ -208,9 +255,8 @@ User question: ${userMessage}`;
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex items-start gap-3 animate-slide-up ${
-                    message.sender === 'user' ? 'flex-row-reverse' : ''
-                  }`}
+                  className={`flex items-start gap-3 animate-slide-up ${message.sender === 'user' ? 'flex-row-reverse' : ''
+                    }`}
                 >
                   <Avatar className="w-8 h-8">
                     <AvatarFallback className={message.sender === 'bot' ? 'bg-primary text-primary-foreground' : 'bg-secondary'}>
@@ -221,16 +267,41 @@ User question: ${userMessage}`;
                       )}
                     </AvatarFallback>
                   </Avatar>
-                  
+
                   <div className={`max-w-[80%] ${message.sender === 'user' ? 'text-right' : ''}`}>
                     <div
-                      className={`rounded-lg px-4 py-2 ${
-                        message.sender === 'user'
-                          ? 'bg-primary text-primary-foreground ml-auto'
-                          : 'bg-secondary text-foreground'
-                      }`}
+                      className={`rounded-lg px-4 py-2 ${message.sender === 'user'
+                        ? 'bg-primary text-primary-foreground ml-auto'
+                        : 'bg-secondary text-foreground'
+                        }`}
                     >
-                      <p className="text-sm">{message.text}</p>
+                      {message.sender === 'bot' ? (
+                        <div className="text-sm whitespace-pre-line">
+                          {message.text.split('\n').map((line, i) => {
+                            if (line.startsWith('📍')) {
+                              return <h3 key={i} className="font-semibold text-primary mb-2">{line}</h3>;
+                            } else if (line.startsWith('CAUSES:') || line.startsWith('SOLUTIONS:') || line.startsWith('PREVENTION:') || line.startsWith('BASIC NEEDS:') || line.startsWith('STEP-BY-STEP:') || line.startsWith('IMPORTANT:')) {
+                              return <h4 key={i} className="font-medium text-secondary-foreground mt-3 mb-2">{line}</h4>;
+                            } else if (line.startsWith('•')) {
+                              return <p key={i} className="ml-3 mb-1">{line}</p>;
+                            } else if (line.startsWith('💡')) {
+                              return <p key={i} className="mt-3 text-primary font-medium">{line}</p>;
+                            } else if (line.startsWith('❗')) {
+                              return <p key={i} className="text-warning-foreground font-medium">{line}</p>;
+                            } else if (line.startsWith('✅')) {
+                              return <p key={i} className="text-success-foreground font-medium">{line}</p>;
+                            } else if (line.match(/^\d+\./)) {
+                              return <p key={i} className="ml-3 mb-1 font-medium">{line}</p>;
+                            } else if (line.trim() === '-------------------') {
+                              return <hr key={i} className="my-3 border-border/50" />;
+                            } else {
+                              return <p key={i} className="mb-1">{line}</p>;
+                            }
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-sm">{message.text}</p>
+                      )}
                     </div>
                     <span className="text-xs text-muted-foreground mt-1 block">
                       {formatTime(message.timestamp)}
@@ -255,7 +326,7 @@ User question: ${userMessage}`;
                   </div>
                 </div>
               )}
-              
+
               <div ref={messagesEndRef} />
             </div>
           </CardContent>
@@ -301,7 +372,7 @@ User question: ${userMessage}`;
             </div>
             <div className="flex items-center justify-between mt-2">
               <p className="text-xs text-muted-foreground">
-                Powered by Google Gemini AI
+                Powered by Intelligent Plant Care AI
               </p>
               {!showApiKeyInput && (
                 <button

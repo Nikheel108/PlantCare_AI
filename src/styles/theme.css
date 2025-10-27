@@ -1,23 +1,61 @@
 :root {
     /* Primary Colors */
-    --primary-green: #2D6A4F;
-    /* Deep forest green for primary actions */
-    --secondary-green: #40916C;
-    /* Softer green for secondary elements */
+    --primary-green: #1B5E20;
+    /* Rich forest green for primary actions */
+    --primary-dark: #0A3D12;
+    /* Darker shade for hover states */
+    --primary-light: #4C8C4A;
+    /* Lighter shade for active states */
+
+    /* Secondary Colors */
+    --secondary-green: #388E3C;
+    /* Vibrant green for secondary elements */
+    --secondary-teal: #00796B;
+    /* Teal accent for variety */
+    --secondary-sage: #66BB6A;
+    /* Fresh sage for highlights */
+
+    /* Background Colors */
+    --bg-light: #F1F8E9;
+    /* Light mint for main background */
+    --bg-card: #FFFFFF;
+    /* Pure white for cards */
+    --bg-hover: #E8F5E9;
+    /* Subtle hover state background */
+    --bg-accent: #C8E6C9;
+    /* Soft green for accented sections */
+
+    /* Text Colors */
+    --text-primary: #1B4332;
+    /* Dark green for primary text */
+    --text-secondary: #2E7D32;
+    /* Medium green for secondary text */
+    --text-muted: #558B2F;
+    /* Muted green for subtle text */
+    --text-light: #F5F5F5;
+    /* Light text for dark backgrounds */
 
     /* Accent Colors */
-    --accent-sage: #74C69D;
-    /* Light sage for highlights */
-    --accent-earth: #B7E4C7;
-    /* Pale earth tone for backgrounds */
+    --accent-success: #43A047;
+    /* Success green */
+    --accent-warning: #FFA000;
+    /* Warning amber */
+    --accent-error: #D32F2F;
+    /* Error red */
+    --accent-info: #1976D2;
+    /* Info blue */
 
-    /* UI Colors */
-    --white: #FFFFFF;
-    /* Clean white for cards */
-    --off-white: #F8FAF9;
-    /* Subtle background */
-    --text-dark: #1B4332;
-    /* Dark green-black for text */
-    --error: #D62828;
-    /* Red for errors/alerts */
+    /* Border Colors */
+    --border-light: #E0E0E0;
+    /* Light border */
+    --border-dark: #BDBDBD;
+    /* Dark border */
+
+    /* Shadow Colors */
+    --shadow-light: rgba(27, 94, 32, 0.1);
+    /* Light shadow */
+    --shadow-medium: rgba(27, 94, 32, 0.15);
+    /* Medium shadow */
+    --shadow-dark: rgba(27, 94, 32, 0.2);
+    /* Dark shadow */
 }
