@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Camera, Droplets, MessageSquare, TrendingUp, Leaf, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/layout/Navbar";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [soilMoisture, setSoilMoisture] = useState(65);
   const [temperature, setTemperature] = useState(22);
   const [humidity, setHumidity] = useState(58);
@@ -168,6 +170,7 @@ export default function Dashboard() {
                 key={action.title} 
                 className="hover-lift shadow-card border-border/50 cursor-pointer transition-smooth"
                 style={{ animationDelay: `${index * 0.1}s` }}
+                onClick={() => navigate(action.href)}
               >
                 <CardContent className="p-6">
                   <div className={`w-12 h-12 rounded-lg ${action.bgColor} flex items-center justify-center mb-4`}>
@@ -179,6 +182,10 @@ export default function Dashboard() {
                     variant="secondary" 
                     size="sm" 
                     className="w-full hover:bg-primary hover:text-primary-foreground transition-smooth"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(action.href);
+                    }}
                   >
                     Open
                   </Button>

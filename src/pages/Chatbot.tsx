@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Navbar } from "@/components/layout/Navbar";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 interface Message {
   id: string;
@@ -24,6 +25,8 @@ export default function Chatbot() {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [apiKey, setApiKey] = useState<string>(import.meta.env.VITE_GEMINI_API_KEY || '');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(!import.meta.env.VITE_GEMINI_API_KEY);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -34,63 +37,41 @@ export default function Chatbot() {
     scrollToBottom();
   }, [messages]);
 
-  const predefinedResponses = [
-    {
-      keywords: ['hello', 'hi', 'hey', 'greeting'],
-      response: "Hello! I'm here to help with all your plant care needs. Feel free to ask me about watering, diseases, fertilizing, or any other plant-related questions!"
-    },
-    {
-      keywords: ['water', 'watering', 'irrigation', 'moisture'],
-      response: "For watering, I recommend checking soil moisture first. Most plants prefer soil that's moist but not waterlogged. Water when the top inch of soil feels dry. The auto-watering system can help maintain optimal moisture levels automatically!"
-    },
-    {
-      keywords: ['disease', 'sick', 'problem', 'spots', 'yellow', 'brown'],
-      response: "Plant diseases can show various symptoms like yellowing leaves, brown spots, or wilting. I'd recommend using our Disease Detection feature to upload a photo for accurate diagnosis. Common issues include overwatering, fungal infections, or nutrient deficiencies."
-    },
-    {
-      keywords: ['fertilizer', 'fertilize', 'nutrients', 'feed'],
-      response: "Plants need regular feeding! Use a balanced fertilizer (10-10-10 NPK) during growing season. Organic options like compost or worm castings are great too. Fertilize every 2-4 weeks in spring/summer, less in winter."
-    },
-    {
-      keywords: ['light', 'sun', 'shade', 'lighting'],
-      response: "Light requirements vary by plant! Most houseplants prefer bright, indirect light. Avoid direct sunlight which can scorch leaves. If natural light is limited, consider grow lights. Signs of insufficient light include leggy growth and pale leaves."
-    },
-    {
-      keywords: ['humidity', 'air', 'environment'],
-      response: "Many plants love humidity! Aim for 40-60% relative humidity. You can increase humidity by grouping plants together, using a humidifier, or placing plants on pebble trays with water."
-    },
-    {
-      keywords: ['temperature', 'hot', 'cold', 'heat'],
-      response: "Most houseplants prefer temperatures between 65-75°F (18-24°C). Avoid placing plants near heating vents, air conditioners, or drafty windows. Sudden temperature changes can stress plants."
-    },
-    {
-      keywords: ['repot', 'repotting', 'pot', 'container'],
-      response: "Repot when roots are visible through drainage holes or circling the pot. Spring is the best time. Choose a pot 1-2 inches larger in diameter. Use well-draining potting mix and be gentle with roots."
-    },
-    {
-      keywords: ['pruning', 'trim', 'cut', 'deadhead'],
-      response: "Regular pruning keeps plants healthy! Remove dead, damaged, or diseased parts first. Pinch or cut above nodes to encourage bushier growth. Clean tools with rubbing alcohol between plants to prevent disease spread."
-    }
-  ];
-
-  const getBotResponse = (userMessage: string): string => {
-    const lowerMessage = userMessage.toLowerCase();
-    
-    for (const response of predefinedResponses) {
-      if (response.keywords.some(keyword => lowerMessage.includes(keyword))) {
-        return response.response;
+  const getGeminiResponse = async (userMessage: string): Promise<string> => {
+    try {
+      if (!apiKey) {
+        return "Please provide your Gemini API key to get AI-powered responses. You can get one from https://makersuite.google.com/app/apikey";
       }
+
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+
+      const prompt = `You are PlantCareAI, an expert plant care assistant. Your role is to help users with:
+- Plant care advice (watering, fertilizing, pruning)
+- Disease identification and treatment
+- Environmental conditions (light, humidity, temperature)
+- Repotting and propagation
+- General plant health questions
+
+Provide accurate, helpful, and concise advice. Be friendly and encouraging.
+
+User question: ${userMessage}`;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      
+      return text || "I apologize, but I couldn't generate a response. Please try again.";
+    } catch (error) {
+      console.error('Gemini API Error:', error);
+      if (error instanceof Error) {
+        if (error.message.includes('API key')) {
+          return "Invalid API key. Please check your Gemini API key and try again. Get your key from https://makersuite.google.com/app/apikey";
+        }
+        return `Error: ${error.message}. Please try again.`;
+      }
+      return "I encountered an error while processing your request. Please try again.";
     }
-    
-    // Default responses for unmatched queries
-    const defaultResponses = [
-      "That's an interesting question! While I can provide general plant care advice, for specific issues, I'd recommend consulting with a local horticulturist or using our Disease Detection feature for visual diagnosis.",
-      "I'd love to help with that! Can you provide more details about your plant's current condition, species, or the specific issue you're experiencing?",
-      "Great question! For the most accurate advice, it would help to know more about your plant's environment, watering schedule, and any symptoms you've noticed.",
-      "I'm here to help! While I can offer general guidance, remember that each plant is unique. Consider factors like your local climate, plant species, and current care routine when implementing any advice."
-    ];
-    
-    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
   };
 
   const handleSendMessage = async () => {
@@ -104,21 +85,32 @@ export default function Chatbot() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentMessage = inputMessage;
     setInputMessage('');
     setIsTyping(true);
 
-    // Simulate bot thinking time
-    setTimeout(() => {
+    try {
+      const responseText = await getGeminiResponse(currentMessage);
+      
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: getBotResponse(inputMessage),
+        text: responseText,
         sender: 'bot',
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, botResponse]);
+    } catch (error) {
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "I apologize, but I encountered an error. Please try again.",
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
       setIsTyping(false);
-    }, 1000 + Math.random() * 2000);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -149,9 +141,54 @@ export default function Chatbot() {
             Plant Care Assistant
           </h1>
           <p className="text-muted-foreground">
-            Get expert advice on plant care, diseases, and maintenance
+            Get expert advice on plant care, diseases, and maintenance powered by Google Gemini
           </p>
         </div>
+
+        {/* API Key Input */}
+        {showApiKeyInput && (
+          <Card className="mb-4 border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20">
+            <CardContent className="pt-6">
+              <div className="space-y-3">
+                <div className="flex items-start gap-2">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-sm mb-1">Gemini API Key Required</h3>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Get your free API key from{" "}
+                      <a 
+                        href="https://makersuite.google.com/app/apikey" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        Google AI Studio
+                      </a>
+                    </p>
+                    <div className="flex gap-2">
+                      <Input
+                        type="password"
+                        placeholder="Enter your Gemini API key"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button
+                        onClick={() => {
+                          if (apiKey.trim()) {
+                            setShowApiKeyInput(false);
+                          }
+                        }}
+                        disabled={!apiKey.trim()}
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="shadow-card border-border/50 h-[600px] flex flex-col">
           <CardHeader className="border-b border-border">
@@ -262,9 +299,19 @@ export default function Chatbot() {
                 <Send className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              This is a demo chatbot. For real plant emergencies, consult a professional.
-            </p>
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-xs text-muted-foreground">
+                Powered by Google Gemini AI
+              </p>
+              {!showApiKeyInput && (
+                <button
+                  onClick={() => setShowApiKeyInput(true)}
+                  className="text-xs text-primary hover:underline"
+                >
+                  Change API Key
+                </button>
+              )}
+            </div>
           </div>
         </Card>
       </main>

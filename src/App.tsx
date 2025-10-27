@@ -11,6 +11,8 @@ import DiseaseDetection from "./pages/DiseaseDetection";
 import AutoWatering from "./pages/AutoWatering";
 import Chatbot from "./pages/Chatbot";
 import History from "./pages/History";
+import Profile from "./pages/Profile";
+import PlantTypes from "./pages/PlantTypes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,9 +29,11 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/detection" element={<DiseaseDetection />} />
+            <Route path="/plant-types" element={<PlantTypes />} />
             <Route path="/watering" element={<AutoWatering />} />
             <Route path="/chatbot" element={<Chatbot />} />
             <Route path="/history" element={<History />} />
+            <Route path="/profile" element={<Profile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

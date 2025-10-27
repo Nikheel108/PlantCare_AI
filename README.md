@@ -16,7 +16,8 @@ A web application for managing plant care with features like automated watering,
 - React + TypeScript
 - Vite
 - Tailwind CSS
-- Components UI
+- shadcn/ui Components
+- Google Gemini AI (for chatbot)
 
 ## Getting Started
 
@@ -30,7 +31,16 @@ git clone [repository-url]
 npm install
 ```
 
-3. Start the development server:
+3. Set up environment variables:
+   - Copy `.env.example` to `.env.local`
+   - Get your Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+   - Add your API key to `.env.local`:
+   ```
+   VITE_GEMINI_API_KEY=your_api_key_here
+   ```
+   - Alternatively, you can enter the API key directly in the chatbot interface
+
+4. Start the development server:
 ```bash
 npm run dev
 ```

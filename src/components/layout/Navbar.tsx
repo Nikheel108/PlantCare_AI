@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import plantLogo from "@/assets/plant-logo.png";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard" },
   { name: "Disease Detection", href: "/detection" },
+  { name: "Plant Types", href: "/plant-types" },
   { name: "Auto-Watering", href: "/watering" },
   { name: "Chatbot", href: "/chatbot" },
   { name: "History", href: "/history" },
@@ -60,13 +62,19 @@ export function Navbar() {
           {/* Right side actions */}
           <div className="flex items-center space-x-2">
             <ThemeToggle />
+            
+            {/* Profile Button */}
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleLogout}
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              onClick={() => navigate("/profile")}
+              className="text-muted-foreground hover:text-primary hover:bg-primary/10"
             >
-              <LogOut className="h-5 w-5" />
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-gradient-to-br from-green-400 to-green-600 text-white text-sm">
+                  <User className="h-4 w-4" />
+                </AvatarFallback>
+              </Avatar>
             </Button>
 
             {/* Mobile menu button */}
