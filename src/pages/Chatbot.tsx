@@ -44,68 +44,60 @@ export default function Chatbot() {
       }
 
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
-      const prompt = `You are PlantCareAI. Format your responses EXACTLY like this example:
+      // System prompt for friendly, conversational ChatGPT-style responses
+      const systemInstruction = `You are PlantCareAI, a friendly and knowledgeable plant care assistant. 
 
-📍 PROBLEM: [One-line title]
+Answer ONLY plant-related questions about: plant care, diseases, watering, soil, light, fertilizer, pests, identification, growth tips, and maintenance.
 
-CAUSES:
-1. **[Main Cause]**
-   • What: [Brief explanation in 5-7 words]
-   • Signs: [2-3 clear symptoms]
+IMPORTANT RULES:
+1. Respond in NATURAL, CONVERSATIONAL language like ChatGPT - be friendly and easy to understand
+2. Use simple, everyday words - avoid overly technical jargon
+3. Break down complex ideas into short, clear paragraphs
+4. Use bullet points or numbers for lists (natural formatting, not JSON)
+5. Include practical, actionable advice users can follow immediately
+6. Be warm and encouraging - make users feel supported
+7. If a question is not about plants, politely say: "I'm specifically designed to help with plant care questions. Feel free to ask me anything about your plants!"
 
-2. **[Secondary Cause]**
-   • What: [Brief explanation in 5-7 words]
-   • Signs: [2-3 clear symptoms]
+Example response style:
+"Ah, yellow leaves! That's usually a sign your plant is trying to tell you something. The most common reason is overwatering - plants need air around their roots just as much as they need water. Here's what I'd suggest:
 
-SOLUTIONS:
-1. For [Main Cause]:
-   • Step 1: [Clear action in 5-7 words]
-   • Step 2: [Clear action in 5-7 words]
+1. Check the soil first - stick your finger 1-2 inches in. If it feels soggy, give it a break from watering
+2. Make sure your pot has drainage holes so excess water can escape
+3. If watering seems fine, it could be nutrients...
 
-2. For [Secondary Cause]:
-   • Step 1: [Clear action in 5-7 words]
-   • Step 2: [Clear action in 5-7 words]
+Don't worry though, it's usually fixable!"
 
-PREVENTION:
-• [One clear prevention tip]
-• [One clear prevention tip]
+Keep responses concise but helpful. Be conversational, not robotic.`;
 
-💡 QUICK TIP: [One practical, memorable tip]
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-pro",
+        systemInstruction,
+      });
 
--------------------
+      // Balance between creativity and consistency
+      const generationConfig = {
+        temperature: 0.7,
+        topP: 0.95,
+        topK: 40,
+        maxOutputTokens: 4096,
+      } as const;
 
-For care instructions, use this format:
+      // Build chat history from prior turns for better context
+      const history = messages
+        .filter((m) => m.id !== '1')
+        .map((m) => ({
+          role: m.sender === 'user' ? 'user' : 'model',
+          parts: [{ text: m.text }],
+        }));
 
-📍 CARE GUIDE: [Topic]
+      const chatSession = model.startChat({
+        generationConfig,
+        history,
+      });
 
-BASIC NEEDS:
-• Water: [Exact frequency and amount]
-• Light: [Specific requirement]
-• Temperature: [Exact range]
-
-STEP-BY-STEP:
-1. [First step in 5-7 words]
-2. [Second step in 5-7 words]
-3. [Third step in 5-7 words]
-
-IMPORTANT:
-❗ [One crucial warning or tip]
-✅ [One positive reminder]
-
-Use EXACTLY this formatting with:
-• Clear numbering
-• Emoji markers (📍,💡,❗,✅)
-• Section dividers (---)
-• Bold for key terms (**)
-• Short, clear points
-• Proper spacing between sections
-
-User question: ${userMessage}`;
-
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
+      const result = await chatSession.sendMessage(userMessage);
+      const response = result.response;
       const text = response.text();
 
       return text || "I apologize, but I couldn't generate a response. Please try again.";
@@ -276,28 +268,8 @@ User question: ${userMessage}`;
                         }`}
                     >
                       {message.sender === 'bot' ? (
-                        <div className="text-sm whitespace-pre-line">
-                          {message.text.split('\n').map((line, i) => {
-                            if (line.startsWith('📍')) {
-                              return <h3 key={i} className="font-semibold text-primary mb-2">{line}</h3>;
-                            } else if (line.startsWith('CAUSES:') || line.startsWith('SOLUTIONS:') || line.startsWith('PREVENTION:') || line.startsWith('BASIC NEEDS:') || line.startsWith('STEP-BY-STEP:') || line.startsWith('IMPORTANT:')) {
-                              return <h4 key={i} className="font-medium text-secondary-foreground mt-3 mb-2">{line}</h4>;
-                            } else if (line.startsWith('•')) {
-                              return <p key={i} className="ml-3 mb-1">{line}</p>;
-                            } else if (line.startsWith('💡')) {
-                              return <p key={i} className="mt-3 text-primary font-medium">{line}</p>;
-                            } else if (line.startsWith('❗')) {
-                              return <p key={i} className="text-warning-foreground font-medium">{line}</p>;
-                            } else if (line.startsWith('✅')) {
-                              return <p key={i} className="text-success-foreground font-medium">{line}</p>;
-                            } else if (line.match(/^\d+\./)) {
-                              return <p key={i} className="ml-3 mb-1 font-medium">{line}</p>;
-                            } else if (line.trim() === '-------------------') {
-                              return <hr key={i} className="my-3 border-border/50" />;
-                            } else {
-                              return <p key={i} className="mb-1">{line}</p>;
-                            }
-                          })}
+                        <div className="text-sm whitespace-pre-wrap space-y-2">
+                          {message.text}
                         </div>
                       ) : (
                         <p className="text-sm">{message.text}</p>
