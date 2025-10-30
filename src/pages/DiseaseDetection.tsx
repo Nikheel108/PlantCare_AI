@@ -45,7 +45,7 @@ export default function DiseaseDetection() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragActive(false);
-    
+
     const files = e.dataTransfer.files;
     if (files && files[0] && files[0].type.startsWith('image/')) {
       handleImageUpload(files[0]);
@@ -73,14 +73,14 @@ export default function DiseaseDetection() {
 
     setIsAnalyzing(true);
     setError(null);
-    
+
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
       // Convert image to base64 without data URL prefix
       const base64Data = selectedImage.split(',')[1];
-      
+
       const imageParts = [
         {
           inlineData: {
@@ -110,7 +110,7 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
       const result = await model.generateContent([prompt, ...imageParts]);
       const response = await result.response;
       const text = response.text();
-      
+
       // Parse the JSON response
       try {
         // Remove markdown code blocks if present
@@ -152,7 +152,7 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
   return (
     <div className="min-h-screen bg-gradient-bg">
       <Navbar />
-      
+
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 animate-fade-in">
           <h1 className="text-3xl font-bold text-foreground mb-2">
@@ -173,9 +173,9 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
                     <h3 className="font-semibold text-sm mb-1">Gemini API Key Required</h3>
                     <p className="text-xs text-muted-foreground mb-3">
                       Get your free API key from{" "}
-                      <a 
-                        href="https://makersuite.google.com/app/apikey" 
-                        target="_blank" 
+                      <a
+                        href="https://makersuite.google.com/app/apikey"
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary hover:underline"
                       >
@@ -233,11 +233,10 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
             <CardContent>
               {!selectedImage ? (
                 <div
-                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-smooth ${
-                    dragActive 
-                      ? 'border-primary bg-primary/5' 
+                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-smooth ${dragActive
+                      ? 'border-primary bg-primary/5'
                       : 'border-border hover:border-primary/50 hover:bg-primary/5'
-                  }`}
+                    }`}
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
                   onDragEnter={() => setDragActive(true)}
@@ -250,7 +249,7 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
                   <p className="text-muted-foreground mb-4">
                     or click to browse your files
                   </p>
-                  <Button 
+                  <Button
                     onClick={() => fileInputRef.current?.click()}
                     className="gradient-primary text-white hover:opacity-90"
                   >
@@ -282,10 +281,10 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
                   >
                     <X className="h-4 w-4" />
                   </Button>
-                  
+
                   {!result && !isAnalyzing && (
                     <div className="mt-4">
-                      <Button 
+                      <Button
                         onClick={analyzeImage}
                         className="w-full gradient-primary text-white hover:opacity-90"
                         size="lg"
@@ -349,12 +348,11 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
                       <h4 className="font-medium text-foreground mb-2 text-lg">{result.diseaseName}</h4>
                       <p className="text-sm text-muted-foreground mb-3">{result.description}</p>
                       <div className="flex items-center gap-2">
-                        <AlertTriangle className={`h-4 w-4 ${
-                          result.severity === "Severe" ? "text-red-500" :
-                          result.severity === "Moderate" ? "text-yellow-500" :
-                          result.severity === "Mild" ? "text-orange-500" :
-                          "text-green-500"
-                        }`} />
+                        <AlertTriangle className={`h-4 w-4 ${result.severity === "Severe" ? "text-red-500" :
+                            result.severity === "Moderate" ? "text-yellow-500" :
+                              result.severity === "Mild" ? "text-orange-500" :
+                                "text-green-500"
+                          }`} />
                         <span className="text-sm font-medium">Severity: {result.severity}</span>
                       </div>
                     </div>
@@ -442,7 +440,7 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
                   )}
 
                   <div className="flex gap-2">
-                    <Button 
+                    <Button
                       onClick={clearImage}
                       variant="outline"
                       className="flex-1"
