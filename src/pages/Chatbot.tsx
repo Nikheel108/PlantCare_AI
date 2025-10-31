@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Leaf } from "lucide-react";
+import { Send, Bot, User, Leaf, Sprout } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -358,6 +358,15 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
           </div>
         </Card>
       </main>
+
+      {/* Decorative Elements */}
+      <div className="relative py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
+        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
+        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
+      </div>
     </div>
   );
 }

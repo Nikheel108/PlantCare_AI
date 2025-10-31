@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Droplets, Sun, ThermometerSun, Leaf } from "lucide-react";
+import { Search, Droplets, Sun, ThermometerSun, Leaf, Sprout } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,7 @@ export default function PlantTypes() {
       id: 1,
       name: "Snake Plant",
       scientificName: "Sansevieria trifasciata",
-      image: "https://images.unsplash.com/photo-1593482892290-f54927ae1bb6?w=400&h=300&fit=crop",
+      image: "https://rosysoil.com/cdn/shop/articles/Dracaena-trifasciata-plant.jpg?v=1671498817",
       category: "Indoor",
       difficulty: "Easy",
       wateringFrequency: "Every 2-3 weeks",
@@ -41,7 +41,7 @@ export default function PlantTypes() {
       id: 2,
       name: "Monstera Deliciosa",
       scientificName: "Monstera deliciosa",
-      image: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&h=300&fit=crop",
+      image: "https://www.barrina-led.com/cdn/shop/articles/enhancing-your-indoor-oasis-with-the-perfect-led-grow-light-for-monstera-897716.jpg?v=1718242546",
       category: "Indoor",
       difficulty: "Medium",
       wateringFrequency: "Weekly",
@@ -54,7 +54,7 @@ export default function PlantTypes() {
       id: 3,
       name: "Aloe Vera",
       scientificName: "Aloe barbadensis miller",
-      image: "https://images.unsplash.com/photo-1596548438137-d51ea5c83ca5?w=400&h=300&fit=crop",
+      image: "https://www.kew.org/sites/default/files/styles/social/public/2020-04/Aloe_Vera.jpg.webp?itok=dfBwdzOw",
       category: "Succulent",
       difficulty: "Easy",
       wateringFrequency: "Every 2-3 weeks",
@@ -93,7 +93,7 @@ export default function PlantTypes() {
       id: 6,
       name: "Pothos",
       scientificName: "Epipremnum aureum",
-      image: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&h=300&fit=crop",
+      image: "https://www.marthastewart.com/thmb/9etIquryA7k90xAxOOOwAVZMA60=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/GettyImages-2170686151-675aeaba15364e1c876dc485f7e6d8d8.jpg",
       category: "Indoor",
       difficulty: "Easy",
       wateringFrequency: "Every 1-2 weeks",
@@ -119,7 +119,7 @@ export default function PlantTypes() {
       id: 8,
       name: "Rubber Plant",
       scientificName: "Ficus elastica",
-      image: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&h=300&fit=crop",
+      image: "https://www.marthastewart.com/thmb/mrMm1qIHZ7Pp-Ze4kFM8SaEMO5U=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/grow-care-elastic-ficus-rubber-small-variegated-getty-0623-abbd86ab7eba4862805f7ab44ff32a55.jpg",
       category: "Indoor",
       difficulty: "Medium",
       wateringFrequency: "Weekly",
@@ -132,7 +132,7 @@ export default function PlantTypes() {
       id: 9,
       name: "Jade Plant",
       scientificName: "Crassula ovata",
-      image: "https://images.unsplash.com/photo-1459156212016-c812468e2115?w=400&h=300&fit=crop",
+      image: "https://m.media-amazon.com/images/I/51n0fa4c-iL._AC_UF1000,1000_QL80_.jpg",
       category: "Succulent",
       difficulty: "Easy",
       wateringFrequency: "Every 2-3 weeks",
@@ -145,7 +145,7 @@ export default function PlantTypes() {
       id: 10,
       name: "Boston Fern",
       scientificName: "Nephrolepis exaltata",
-      image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=400&h=300&fit=crop",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxY81iO9uLmOhUSY0ifkB875ptiDhe6j1P6g&s",
       category: "Fern",
       difficulty: "Medium",
       wateringFrequency: "2-3 times per week",
@@ -158,7 +158,7 @@ export default function PlantTypes() {
       id: 11,
       name: "ZZ Plant",
       scientificName: "Zamioculcas zamiifolia",
-      image: "https://images.unsplash.com/photo-1632207691143-643e2a9a9361?w=400&h=300&fit=crop",
+      image: "https://greenparadiselive.com/cdn/shop/files/ZZ_PLANT_3_1200x1200.png?v=1718173136",
       category: "Indoor",
       difficulty: "Easy",
       wateringFrequency: "Every 2-3 weeks",
@@ -171,7 +171,7 @@ export default function PlantTypes() {
       id: 12,
       name: "Lavender",
       scientificName: "Lavandula",
-      image: "https://images.unsplash.com/photo-1595239244990-1c62c6f1e6c1?w=400&h=300&fit=crop",
+      image: "https://upload.wikimedia.org/wikipedia/commons/7/7e/Single_lavender_flower02.jpg",
       category: "Outdoor",
       difficulty: "Medium",
       wateringFrequency: "Weekly",
@@ -186,7 +186,7 @@ export default function PlantTypes() {
 
   const filteredPlants = plants.filter((plant) => {
     const matchesSearch = plant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         plant.scientificName.toLowerCase().includes(searchQuery.toLowerCase());
+      plant.scientificName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "All" || plant.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -203,7 +203,7 @@ export default function PlantTypes() {
   return (
     <div className="min-h-screen bg-gradient-bg">
       <Navbar />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 animate-fade-in">
           <h1 className="text-3xl font-bold text-foreground mb-2">
@@ -232,11 +232,10 @@ export default function PlantTypes() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-smooth ${
-                  selectedCategory === category
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-smooth ${selectedCategory === category
                     ? "bg-primary text-primary-foreground shadow-soft"
                     : "bg-secondary text-foreground hover:bg-secondary/80"
-                }`}
+                  }`}
               >
                 {category}
               </button>
@@ -342,6 +341,15 @@ export default function PlantTypes() {
           </div>
         )}
       </main>
+
+      {/* Decorative Elements */}
+      <div className="relative py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
+        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
+        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
+      </div>
     </div>
   );
 }

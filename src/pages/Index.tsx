@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Leaf, ArrowRight, Droplets, Camera, MessageSquare, BarChart3 } from "lucide-react";
+import { Leaf, ArrowRight, Droplets, Camera, MessageSquare, BarChart3, Sprout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import plantLogo from "@/assets/plant-logo.png";
@@ -46,6 +46,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-bg">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-10 left-10 w-20 h-20 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-20 w-32 h-32 bg-primary/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-green-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
+
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0">
@@ -56,7 +63,7 @@ const Index = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-background/50"></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center animate-fade-in">
             {/* Logo */}
@@ -70,14 +77,14 @@ const Index = () => {
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-6">
               Smart Plant Care with AI Technology
             </h2>
-            
+
             <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-              Monitor your plants' health, detect diseases early, and automate watering 
+              Monitor your plants' health, detect diseases early, and automate watering
               with our intelligent plant care system. Experience the future of gardening.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
+              <Button
                 onClick={() => navigate("/login")}
                 size="lg"
                 className="gradient-primary text-white hover:opacity-90 shadow-soft px-8 py-4 text-lg"
@@ -85,9 +92,9 @@ const Index = () => {
                 Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              
-              <Button 
-                variant="outline" 
+
+              <Button
+                variant="outline"
                 size="lg"
                 className="px-8 py-4 text-lg hover-lift"
                 onClick={() => navigate("/dashboard")}
@@ -112,8 +119,8 @@ const Index = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
-            <Card 
-              key={feature.title} 
+            <Card
+              key={feature.title}
               className="hover-lift shadow-card border-border/50 text-center"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
@@ -143,7 +150,7 @@ const Index = () => {
             <p className="text-lg text-muted-foreground mb-8">
               Join thousands of gardeners using AI to grow healthier plants
             </p>
-            <Button 
+            <Button
               onClick={() => navigate("/login")}
               size="lg"
               className="gradient-primary text-white hover:opacity-90 shadow-soft px-8 py-4 text-lg"
@@ -153,6 +160,15 @@ const Index = () => {
             </Button>
           </div>
         </div>
+      </div>
+
+      {/* Decorative Elements */}
+      <div className="relative py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
+        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
+        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
       </div>
     </div>
   );

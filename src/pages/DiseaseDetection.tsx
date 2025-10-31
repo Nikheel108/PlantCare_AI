@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Upload, Camera, X, CheckCircle, AlertTriangle, Info, Loader2 } from "lucide-react";
+import { Upload, Camera, X, CheckCircle, AlertTriangle, Info, Loader2, Leaf, Sprout } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -234,8 +234,8 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
               {!selectedImage ? (
                 <div
                   className={`border-2 border-dashed rounded-lg p-8 text-center transition-smooth ${dragActive
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:border-primary/50 hover:bg-primary/5'
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50 hover:bg-primary/5'
                     }`}
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
@@ -349,9 +349,9 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
                       <p className="text-sm text-muted-foreground mb-3">{result.description}</p>
                       <div className="flex items-center gap-2">
                         <AlertTriangle className={`h-4 w-4 ${result.severity === "Severe" ? "text-red-500" :
-                            result.severity === "Moderate" ? "text-yellow-500" :
-                              result.severity === "Mild" ? "text-orange-500" :
-                                "text-green-500"
+                          result.severity === "Moderate" ? "text-yellow-500" :
+                            result.severity === "Mild" ? "text-orange-500" :
+                              "text-green-500"
                           }`} />
                         <span className="text-sm font-medium">Severity: {result.severity}</span>
                       </div>
@@ -463,6 +463,15 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
           </Card>
         </div>
       </main>
+
+      {/* Decorative Elements */}
+      <div className="relative py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
+        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
+        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Eye, EyeOff, Leaf } from "lucide-react";
+import { Eye, EyeOff, Leaf, Sprout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +17,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Simulate login
     setTimeout(() => {
       localStorage.setItem("isLoggedIn", "true");
@@ -68,7 +68,7 @@ export default function Login() {
                         className="transition-smooth focus:shadow-soft"
                       />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="password">Password</Label>
                       <div className="relative">
@@ -95,8 +95,8 @@ export default function Login() {
                       </div>
                     </div>
 
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       className="w-full gradient-primary text-white hover:opacity-90 transition-smooth shadow-soft"
                       disabled={isLoading}
                     >
@@ -136,7 +136,7 @@ export default function Login() {
                         className="transition-smooth focus:shadow-soft"
                       />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="signup-password">Password</Label>
                       <div className="relative">
@@ -163,8 +163,8 @@ export default function Login() {
                       </div>
                     </div>
 
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       className="w-full gradient-primary text-white hover:opacity-90 transition-smooth shadow-soft"
                       disabled={isLoading}
                     >
@@ -211,6 +211,13 @@ export default function Login() {
           <p className="text-xl text-white/90 max-w-md">
             Monitor your plants' health, detect diseases early, and automate watering with our intelligent system.
           </p>
+        </div>
+
+        {/* Decorative Elements */}
+        <div className="absolute bottom-20 right-20 flex gap-4 opacity-40">
+          <Sprout className="h-12 w-12 text-white animate-pulse" style={{ animationDelay: '0s' }} />
+          <Leaf className="h-12 w-12 text-white animate-pulse" style={{ animationDelay: '0.3s' }} />
+          <Sprout className="h-12 w-12 text-white animate-pulse" style={{ animationDelay: '0.6s' }} />
         </div>
       </div>
     </div>

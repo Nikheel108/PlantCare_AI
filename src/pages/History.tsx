@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calendar, Filter, Download, Eye, Search } from "lucide-react";
+import { Calendar, Filter, Download, Eye, Search, Leaf, Sprout } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -176,7 +176,7 @@ export default function History() {
   return (
     <div className="min-h-screen bg-gradient-bg">
       <Navbar />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 animate-fade-in">
           <h1 className="text-3xl font-bold text-foreground mb-2">
@@ -202,7 +202,7 @@ export default function History() {
                   />
                 </div>
               </div>
-              
+
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger className="w-full sm:w-48">
                   <SelectValue placeholder="Filter by status" />
@@ -276,9 +276,9 @@ export default function History() {
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <div className="w-12 bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                                <div 
-                                  className="bg-primary h-2 rounded-full" 
-                                  style={{width: `${record.confidence}%`}}
+                                <div
+                                  className="bg-primary h-2 rounded-full"
+                                  style={{ width: `${record.confidence}%` }}
                                 ></div>
                               </div>
                               <span className="text-sm">{record.confidence}%</span>
@@ -367,6 +367,15 @@ export default function History() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Decorative Elements */}
+      <div className="relative py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
+        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
+        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
+      </div>
     </div>
   );
 }

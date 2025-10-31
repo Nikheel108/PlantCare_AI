@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Droplets, MessageSquare, TrendingUp, Leaf, Activity } from "lucide-react";
+import { Camera, Droplets, MessageSquare, TrendingUp, Leaf, Activity, Sprout } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -70,7 +70,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-bg">
       <Navbar />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Header */}
         <div className="mb-8 animate-fade-in">
@@ -95,8 +95,8 @@ export default function Dashboard() {
               <div className="text-2xl font-bold text-foreground mb-2">
                 {soilMoisture.toFixed(0)}%
               </div>
-              <Progress 
-                value={soilMoisture} 
+              <Progress
+                value={soilMoisture}
                 className="h-2"
               />
               <p className="text-xs text-muted-foreground mt-2">
@@ -150,8 +150,8 @@ export default function Dashboard() {
               <div className="text-2xl font-bold text-foreground mb-2">
                 {plantsHealth.toFixed(0)}%
               </div>
-              <Progress 
-                value={plantsHealth} 
+              <Progress
+                value={plantsHealth}
                 className="h-2"
               />
               <p className="text-xs text-muted-foreground mt-2">
@@ -166,8 +166,8 @@ export default function Dashboard() {
           <h2 className="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickActions.map((action, index) => (
-              <Card 
-                key={action.title} 
+              <Card
+                key={action.title}
                 className="hover-lift shadow-card border-border/50 cursor-pointer transition-smooth"
                 style={{ animationDelay: `${index * 0.1}s` }}
                 onClick={() => navigate(action.href)}
@@ -178,9 +178,9 @@ export default function Dashboard() {
                   </div>
                   <h3 className="font-semibold text-foreground mb-2">{action.title}</h3>
                   <p className="text-sm text-muted-foreground mb-4">{action.description}</p>
-                  <Button 
-                    variant="secondary" 
-                    size="sm" 
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     className="w-full hover:bg-primary hover:text-primary-foreground transition-smooth"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -203,8 +203,8 @@ export default function Dashboard() {
           <CardContent>
             <div className="space-y-4">
               {recentActivities.map((activity, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-smooth"
                 >
                   <div className="flex items-center space-x-4">
@@ -214,13 +214,12 @@ export default function Dashboard() {
                       <p className="text-xs text-muted-foreground">{activity.plant} • {activity.time}</p>
                     </div>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    activity.status === "Healthy" || activity.status === "Success" 
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${activity.status === "Healthy" || activity.status === "Success"
                       ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
                       : activity.status === "Warning"
-                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
-                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
-                  }`}>
+                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
+                        : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+                    }`}>
                     {activity.status}
                   </span>
                 </div>
@@ -229,6 +228,15 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Decorative Elements */}
+      <div className="relative py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
+        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
+        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
+      </div>
     </div>
   );
 }

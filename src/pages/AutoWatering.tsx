@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Droplets, Power, Settings, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react";
+import { Droplets, Power, Settings, TrendingUp, AlertTriangle, CheckCircle, Leaf, Sprout } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -19,14 +19,14 @@ export default function AutoWatering() {
     const interval = setInterval(() => {
       setSoilMoisture(prev => {
         const newValue = Math.max(20, Math.min(100, prev + (Math.random() - 0.5) * 3));
-        
+
         // Auto-watering logic
         if (isAutoMode && newValue < 35 && !isPumpActive) {
           setIsPumpActive(true);
           setPumpDuration(10);
           setLastWatering("Just now");
         }
-        
+
         return newValue;
       });
     }, 2000);
@@ -75,7 +75,7 @@ export default function AutoWatering() {
   return (
     <div className="min-h-screen bg-gradient-bg">
       <Navbar />
-      
+
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 animate-fade-in">
           <h1 className="text-3xl font-bold text-foreground mb-2">
@@ -104,9 +104,9 @@ export default function AutoWatering() {
                   {moistureStatus.status}
                 </Badge>
               </div>
-              
+
               <Progress value={soilMoisture} className="h-3 mb-4" />
-              
+
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Optimal Range:</span>
@@ -155,7 +155,7 @@ export default function AutoWatering() {
                   <Droplets className="mr-2 h-5 w-5" />
                   Start Watering
                 </Button>
-                
+
                 {isPumpActive && (
                   <Button
                     onClick={stopPump}
@@ -181,11 +181,10 @@ export default function AutoWatering() {
             </CardHeader>
             <CardContent>
               <div className="text-center mb-4">
-                <div className={`w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center ${
-                  isPumpActive 
-                    ? 'bg-green-100 text-green-600 pulse-glow dark:bg-green-900/20' 
+                <div className={`w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center ${isPumpActive
+                    ? 'bg-green-100 text-green-600 pulse-glow dark:bg-green-900/20'
                     : 'bg-gray-100 text-gray-400 dark:bg-gray-800'
-                }`}>
+                  }`}>
                   <Power className="h-8 w-8" />
                 </div>
                 <div className="text-lg font-semibold text-foreground">
@@ -205,12 +204,12 @@ export default function AutoWatering() {
                     {isAutoMode ? 'Auto' : 'Manual'}
                   </Badge>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Last Watering:</span>
                   <span className="text-sm font-medium">{lastWatering}</span>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Daily Usage:</span>
                   <span className="text-sm font-medium">2.3L</span>
@@ -236,7 +235,7 @@ export default function AutoWatering() {
                   const height = Math.random() * 60 + 20;
                   return (
                     <div key={i} className="flex flex-col items-center">
-                      <div 
+                      <div
                         className="w-full bg-primary/20 rounded-t"
                         style={{ height: `${height}%` }}
                       ></div>
@@ -247,7 +246,7 @@ export default function AutoWatering() {
                   );
                 })}
               </div>
-              
+
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>0%</span>
                 <span>50%</span>
@@ -288,6 +287,15 @@ export default function AutoWatering() {
           </Card>
         </div>
       </main>
+
+      {/* Decorative Elements */}
+      <div className="relative py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
+        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
+        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
+        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
+      </div>
     </div>
   );
 }
