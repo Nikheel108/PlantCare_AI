@@ -34,9 +34,9 @@ export function Navbar() {
         <div className="flex justify-between h-16">
           {/* Logo and Brand */}
           <div className="flex items-center">
-            <Link to="/dashboard" className="flex items-center space-x-3 hover:opacity-90 transition-smooth">
-              <img src={plantLogo} alt="PlantCareAI" className="h-8 w-8" />
-              <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            <Link to="/dashboard" className="flex items-center space-x-2 sm:space-x-3 hover:opacity-90 transition-smooth">
+              <img src={plantLogo} alt="PlantCareAI" className="h-8 w-8 sm:h-9 sm:w-9" />
+              <span className="text-lg sm:text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                 PlantCareAI
               </span>
             </Link>
@@ -60,7 +60,7 @@ export function Navbar() {
           </div>
 
           {/* Right side actions */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 sm:space-x-2">
             <ThemeToggle />
             
             {/* Profile Button */}
@@ -68,7 +68,8 @@ export function Navbar() {
               variant="ghost"
               size="icon"
               onClick={() => navigate("/profile")}
-              className="text-muted-foreground hover:text-primary hover:bg-primary/10"
+              className="text-muted-foreground hover:text-primary hover:bg-primary/10 min-w-[44px] min-h-[44px]"
+              aria-label="View profile"
             >
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-gradient-to-br from-green-400 to-green-600 text-white text-sm">
@@ -81,10 +82,12 @@ export function Navbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="md:hidden min-w-[44px] min-h-[44px]"
               onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle menu"
+              aria-expanded={isOpen}
             >
-              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
         </div>
@@ -98,7 +101,7 @@ export function Navbar() {
                   key={item.name}
                   to={item.href}
                   onClick={() => setIsOpen(false)}
-                  className={`block px-3 py-2 rounded-lg text-base font-medium transition-smooth ${
+                  className={`block px-4 py-3 rounded-lg text-base font-medium transition-smooth min-h-[44px] flex items-center ${
                     isActive(item.href)
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground hover:bg-accent/20"
@@ -107,6 +110,19 @@ export function Navbar() {
                   {item.name}
                 </Link>
               ))}
+              <div className="border-t border-border pt-2 mt-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setIsOpen(false);
+                    handleLogout();
+                  }}
+                  className="w-full justify-start px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent/20 min-h-[44px]"
+                >
+                  <LogOut className="h-5 w-5 mr-2" />
+                  Logout
+                </Button>
+              </div>
             </div>
           </div>
         )}
