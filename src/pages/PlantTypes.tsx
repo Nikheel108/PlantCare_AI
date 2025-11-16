@@ -204,26 +204,26 @@ export default function PlantTypes() {
     <div className="min-h-screen bg-gradient-bg">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8 animate-fade-in">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8 animate-fade-in">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
             Plant Types & Care Guide
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Explore different plant varieties and learn how to care for them
           </p>
         </div>
 
         {/* Search and Filter */}
-        <div className="mb-8 space-y-4">
+        <div className="mb-6 sm:mb-8 space-y-3 sm:space-y-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search plants by name or scientific name..."
+              placeholder="Search plants..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 h-11 sm:h-12 text-base"
             />
           </div>
 
@@ -232,7 +232,7 @@ export default function PlantTypes() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-smooth ${selectedCategory === category
+                className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-smooth min-h-[40px] ${selectedCategory === category
                     ? "bg-primary text-primary-foreground shadow-soft"
                     : "bg-secondary text-foreground hover:bg-secondary/80"
                   }`}
@@ -244,59 +244,62 @@ export default function PlantTypes() {
         </div>
 
         {/* Results Count */}
-        <div className="mb-4">
-          <p className="text-sm text-muted-foreground">
+        <div className="mb-3 sm:mb-4">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Showing {filteredPlants.length} {filteredPlants.length === 1 ? 'plant' : 'plants'}
           </p>
         </div>
 
         {/* Plants Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {filteredPlants.map((plant, index) => (
             <Card
               key={plant.id}
               className="hover-lift shadow-card border-border/50 overflow-hidden"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="relative h-48 overflow-hidden">
+              <div className="relative h-40 sm:h-48 overflow-hidden">
                 <img
                   src={plant.image}
                   alt={plant.name}
                   className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                  loading="lazy"
                 />
                 <div className="absolute top-2 right-2">
-                  <Badge className={getDifficultyColor(plant.difficulty)}>
+                  <Badge className={`${getDifficultyColor(plant.difficulty)} text-xs`}>
                     {plant.difficulty}
                   </Badge>
                 </div>
               </div>
 
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground">{plant.name}</h3>
-                    <p className="text-xs text-muted-foreground italic">{plant.scientificName}</p>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex flex-col gap-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">{plant.name}</h3>
+                      <p className="text-xs text-muted-foreground italic truncate">{plant.scientificName}</p>
+                    </div>
+                    <Badge variant="outline" className="text-xs whitespace-nowrap">{plant.category}</Badge>
                   </div>
-                  <Badge variant="outline">{plant.category}</Badge>
                 </CardTitle>
               </CardHeader>
 
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{plant.description}</p>
+              <CardContent className="space-y-3 sm:space-y-4">
+                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{plant.description}</p>
 
                 {/* Care Requirements */}
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-xs sm:text-sm">
                   <div className="flex items-start gap-2">
                     <Droplets className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p className="font-medium text-foreground">Watering</p>
-                      <p className="text-muted-foreground">{plant.wateringFrequency}</p>
+                      <p className="text-muted-foreground truncate">{plant.wateringFrequency}</p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-2">
                     <Sun className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p className="font-medium text-foreground">Sunlight</p>
                       <p className="text-muted-foreground">{plant.sunlight}</p>
                     </div>

@@ -76,38 +76,38 @@ export default function AutoWatering() {
     <div className="min-h-screen bg-gradient-bg">
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8 animate-fade-in">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8 animate-fade-in">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
             Auto-Watering System
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Monitor soil moisture and control irrigation automatically
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Soil Moisture Card */}
           <Card className="shadow-card border-border/50 hover-lift">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Droplets className="h-5 w-5 text-cyan-600" />
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Droplets className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-600" />
                 Soil Moisture
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-center mb-4">
-                <div className="text-4xl font-bold text-foreground mb-2">
+                <div className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
                   {soilMoisture.toFixed(0)}%
                 </div>
-                <Badge className={`${moistureStatus.bg} ${moistureStatus.color} border-0`}>
+                <Badge className={`${moistureStatus.bg} ${moistureStatus.color} border-0 text-xs sm:text-sm`}>
                   {moistureStatus.status}
                 </Badge>
               </div>
 
-              <Progress value={soilMoisture} className="h-3 mb-4" />
+              <Progress value={soilMoisture} className="h-2 sm:h-3 mb-4" />
 
-              <div className="space-y-2 text-sm">
+              <div className="space-y-2 text-xs sm:text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Optimal Range:</span>
                   <span className="font-medium">40-80%</span>
@@ -123,36 +123,37 @@ export default function AutoWatering() {
           {/* Control Panel */}
           <Card className="shadow-card border-border/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
                 Control Panel
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 sm:space-y-6">
               {/* Auto Mode Toggle */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium text-foreground">Auto Mode</h3>
-                  <p className="text-sm text-muted-foreground">
+              <div className="flex items-start sm:items-center justify-between gap-3">
+                <div className="flex-1">
+                  <h3 className="font-medium text-sm sm:text-base text-foreground">Auto Mode</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Automatic watering when soil is dry
                   </p>
                 </div>
                 <Switch
                   checked={isAutoMode}
                   onCheckedChange={setIsAutoMode}
+                  className="flex-shrink-0"
                 />
               </div>
 
               {/* Manual Controls */}
               <div className="space-y-3">
-                <h3 className="font-medium text-foreground">Manual Control</h3>
+                <h3 className="font-medium text-sm sm:text-base text-foreground">Manual Control</h3>
                 <Button
                   onClick={handleManualWatering}
                   disabled={isPumpActive || isAutoMode}
-                  className="w-full gradient-primary text-white hover:opacity-90 disabled:opacity-50"
+                  className="w-full gradient-primary text-white hover:opacity-90 disabled:opacity-50 min-h-[48px]"
                   size="lg"
                 >
-                  <Droplets className="mr-2 h-5 w-5" />
+                  <Droplets className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                   Start Watering
                 </Button>
 
@@ -160,10 +161,10 @@ export default function AutoWatering() {
                   <Button
                     onClick={stopPump}
                     variant="destructive"
-                    className="w-full"
+                    className="w-full min-h-[48px]"
                     size="lg"
                   >
-                    <Power className="mr-2 h-5 w-5" />
+                    <Power className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                     Stop Pump
                   </Button>
                 )}
@@ -172,7 +173,7 @@ export default function AutoWatering() {
           </Card>
 
           {/* Pump Status */}
-          <Card className="shadow-card border-border/50">
+          <Card className="shadow-card border-border/50 md:col-span-2 lg:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Power className="h-5 w-5" />

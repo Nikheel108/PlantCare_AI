@@ -177,132 +177,140 @@ export default function History() {
     <div className="min-h-screen bg-gradient-bg">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8 animate-fade-in">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8 animate-fade-in">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
             Activity History
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Track your plant care activities and monitoring results
           </p>
         </div>
 
         {/* Filters */}
-        <Card className="shadow-card border-border/50 mb-6">
-          <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row gap-4">
+        <Card className="shadow-card border-border/50 mb-4 sm:mb-6">
+          <CardContent className="pt-4 sm:pt-6">
+            <div className="flex flex-col gap-3 sm:gap-4">
               <div className="flex-1">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by plant name or disease..."
+                    placeholder="Search by plant name..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 h-11 sm:h-12 text-base"
                   />
                 </div>
               </div>
 
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="healthy">Healthy</SelectItem>
-                  <SelectItem value="treated">Treated</SelectItem>
-                  <SelectItem value="in progress">In Progress</SelectItem>
-                  <SelectItem value="monitoring">Monitoring</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="w-full h-11 sm:h-12">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="healthy">Healthy</SelectItem>
+                    <SelectItem value="treated">Treated</SelectItem>
+                    <SelectItem value="in progress">In Progress</SelectItem>
+                    <SelectItem value="monitoring">Monitoring</SelectItem>
+                  </SelectContent>
+                </Select>
 
-              <Select value={dateRange} onValueChange={setDateRange}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="Date range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Time</SelectItem>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="week">This Week</SelectItem>
-                  <SelectItem value="month">This Month</SelectItem>
-                </SelectContent>
-              </Select>
+                <Select value={dateRange} onValueChange={setDateRange}>
+                  <SelectTrigger className="w-full h-11 sm:h-12">
+                    <SelectValue placeholder="Date range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="week">This Week</SelectItem>
+                    <SelectItem value="month">This Month</SelectItem>
+                  </SelectContent>
+                </Select>
 
-              <Button variant="outline" className="whitespace-nowrap">
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
+                <Button variant="outline" className="whitespace-nowrap min-h-[44px] sm:min-h-[48px]">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="detections" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="detections">Disease Detection History</TabsTrigger>
-            <TabsTrigger value="watering">Watering History</TabsTrigger>
+        <Tabs defaultValue="detections" className="space-y-4 sm:space-y-6">
+          <TabsList className="grid w-full grid-cols-2 h-auto">
+            <TabsTrigger value="detections" className="text-xs sm:text-sm py-2.5 sm:py-3">
+              Disease Detection
+            </TabsTrigger>
+            <TabsTrigger value="watering" className="text-xs sm:text-sm py-2.5 sm:py-3">
+              Watering History
+            </TabsTrigger>
           </TabsList>
 
           {/* Disease Detection History */}
           <TabsContent value="detections">
             <Card className="shadow-card border-border/50">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
                   Disease Detection Records
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date & Time</TableHead>
-                        <TableHead>Plant</TableHead>
-                        <TableHead>Disease</TableHead>
-                        <TableHead>Confidence</TableHead>
-                        <TableHead>Severity</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {detectionHistory.map((record) => (
-                        <TableRow key={record.id} className="hover:bg-secondary/20">
-                          <TableCell className="font-medium">
-                            {record.date}
-                          </TableCell>
-                          <TableCell>{record.plantName}</TableCell>
-                          <TableCell>{record.disease}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="w-12 bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                                <div
-                                  className="bg-primary h-2 rounded-full"
-                                  style={{ width: `${record.confidence}%` }}
-                                ></div>
-                              </div>
-                              <span className="text-sm">{record.confidence}%</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={getSeverityColor(record.severity)}>
-                              {record.severity}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={getStatusColor(record.status)}>
-                              {record.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <div className="inline-block min-w-full align-middle">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="whitespace-nowrap text-xs sm:text-sm">Date & Time</TableHead>
+                          <TableHead className="whitespace-nowrap text-xs sm:text-sm">Plant</TableHead>
+                          <TableHead className="whitespace-nowrap text-xs sm:text-sm">Disease</TableHead>
+                          <TableHead className="whitespace-nowrap text-xs sm:text-sm">Confidence</TableHead>
+                          <TableHead className="whitespace-nowrap text-xs sm:text-sm">Severity</TableHead>
+                          <TableHead className="whitespace-nowrap text-xs sm:text-sm">Status</TableHead>
+                          <TableHead className="whitespace-nowrap text-xs sm:text-sm">Actions</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {detectionHistory.map((record) => (
+                          <TableRow key={record.id} className="hover:bg-secondary/20">
+                            <TableCell className="font-medium whitespace-nowrap text-xs sm:text-sm">
+                              {record.date}
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap text-xs sm:text-sm">{record.plantName}</TableCell>
+                            <TableCell className="whitespace-nowrap text-xs sm:text-sm">{record.disease}</TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              <div className="flex items-center gap-2">
+                                <div className="w-12 bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                                  <div
+                                    className="bg-primary h-2 rounded-full"
+                                    style={{ width: `${record.confidence}%` }}
+                                  ></div>
+                                </div>
+                                <span className="text-xs sm:text-sm">{record.confidence}%</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              <Badge className={`${getSeverityColor(record.severity)} text-xs`}>
+                                {record.severity}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              <Badge className={`${getStatusColor(record.status)} text-xs`}>
+                                {record.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              <Button variant="ghost" size="sm" className="min-w-[40px] min-h-[40px]" aria-label="View details">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                          ))}
+                        </TableBody>
+                    </Table>
+                  </div>
                 </div>
               </CardContent>
             </Card>
