@@ -86,38 +86,39 @@ export default function Profile() {
     <div className="min-h-screen bg-gradient-bg">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8 animate-fade-in">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8 animate-fade-in">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
             My Profile
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Manage your account and preferences
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Profile Card */}
           <Card className="lg:col-span-2 shadow-card border-border/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <User className="h-4 w-4 sm:h-5 sm:w-5" />
                 Profile Information
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col items-center mb-6">
+              <div className="flex flex-col items-center mb-4 sm:mb-6">
                 {/* Profile Photo */}
                 <div className="relative group">
-                  <Avatar className="h-32 w-32 border-4 border-primary/20">
+                  <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-primary/20">
                     <AvatarImage src={profileImage} alt={userName} />
-                    <AvatarFallback className="text-3xl bg-gradient-to-br from-green-400 to-green-600 text-white">
+                    <AvatarFallback className="text-2xl sm:text-3xl bg-gradient-to-br from-green-400 to-green-600 text-white">
                       {userName.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <label
                     htmlFor="profile-upload"
-                    className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer hover:bg-primary/90 transition-smooth shadow-lg"
+                    className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer hover:bg-primary/90 transition-smooth shadow-lg min-w-[36px] min-h-[36px] flex items-center justify-center"
+                    aria-label="Upload profile photo"
                   >
                     <Camera className="h-4 w-4" />
                     <input
@@ -134,7 +135,7 @@ export default function Profile() {
               {/* User Details */}
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-2">
+                  <label className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-2 mb-2">
                     <User className="h-4 w-4" />
                     Username
                   </label>
@@ -142,27 +143,27 @@ export default function Profile() {
                     <Input
                       value={tempName}
                       onChange={(e) => setTempName(e.target.value)}
-                      className="w-full"
+                      className="w-full h-11 sm:h-12 text-base"
                     />
                   ) : (
-                    <p className="text-lg font-semibold text-foreground">{userName}</p>
+                    <p className="text-base sm:text-lg font-semibold text-foreground">{userName}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-2">
+                  <label className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-2 mb-2">
                     <Mail className="h-4 w-4" />
                     Email
                   </label>
-                  <p className="text-lg text-foreground">{userEmail}</p>
+                  <p className="text-base sm:text-lg text-foreground">{userEmail}</p>
                 </div>
 
-                <div className="pt-4 flex gap-3">
+                <div className="pt-4 flex flex-col sm:flex-row gap-3">
                   {isEditing ? (
                     <>
                       <Button
                         onClick={handleSaveProfile}
-                        className="flex-1 gradient-primary text-white hover:opacity-90"
+                        className="flex-1 gradient-primary text-white hover:opacity-90 min-h-[44px] sm:min-h-[48px]"
                       >
                         <Check className="h-4 w-4 mr-2" />
                         Save Changes
@@ -173,7 +174,7 @@ export default function Profile() {
                           setTempName(userName);
                         }}
                         variant="outline"
-                        className="flex-1"
+                        className="flex-1 min-h-[44px] sm:min-h-[48px]"
                       >
                         Cancel
                       </Button>
@@ -182,7 +183,7 @@ export default function Profile() {
                     <Button
                       onClick={() => setIsEditing(true)}
                       variant="outline"
-                      className="w-full"
+                      className="w-full min-h-[44px] sm:min-h-[48px]"
                     >
                       <Edit2 className="h-4 w-4 mr-2" />
                       Edit Profile

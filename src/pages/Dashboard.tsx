@@ -71,19 +71,19 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-bg">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Welcome Header */}
-        <div className="mb-8 animate-fade-in">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+        <div className="mb-6 sm:mb-8 animate-fade-in">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
             Welcome to PlantCareAI Dashboard
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Monitor and care for your plants with intelligent automation
           </p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card className="hover-lift shadow-card border-border/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -92,7 +92,7 @@ export default function Dashboard() {
               <Droplets className="h-4 w-4 text-cyan-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                 {soilMoisture.toFixed(0)}%
               </div>
               <Progress
@@ -113,7 +113,7 @@ export default function Dashboard() {
               <Activity className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                 {temperature.toFixed(1)}°C
               </div>
               <div className="text-xs text-muted-foreground">
@@ -130,7 +130,7 @@ export default function Dashboard() {
               <Droplets className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                 {humidity.toFixed(0)}%
               </div>
               <div className="text-xs text-muted-foreground">
@@ -147,7 +147,7 @@ export default function Dashboard() {
               <Leaf className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                 {plantsHealth.toFixed(0)}%
               </div>
               <Progress
@@ -162,9 +162,9 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions Grid */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {quickActions.map((action, index) => (
               <Card
                 key={action.title}
@@ -172,16 +172,16 @@ export default function Dashboard() {
                 style={{ animationDelay: `${index * 0.1}s` }}
                 onClick={() => navigate(action.href)}
               >
-                <CardContent className="p-6">
-                  <div className={`w-12 h-12 rounded-lg ${action.bgColor} flex items-center justify-center mb-4`}>
-                    <action.icon className={`h-6 w-6 ${action.color}`} />
+                <CardContent className="p-5 sm:p-6">
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-lg ${action.bgColor} flex items-center justify-center mb-3 sm:mb-4`}>
+                    <action.icon className={`h-6 w-6 sm:h-7 sm:w-7 ${action.color}`} />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">{action.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-4">{action.description}</p>
+                  <h3 className="font-semibold text-base sm:text-lg text-foreground mb-2">{action.title}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">{action.description}</p>
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="w-full hover:bg-primary hover:text-primary-foreground transition-smooth"
+                    className="w-full hover:bg-primary hover:text-primary-foreground transition-smooth min-h-[44px]"
                     onClick={(e) => {
                       e.stopPropagation();
                       navigate(action.href);
@@ -198,23 +198,23 @@ export default function Dashboard() {
         {/* Recent Activity */}
         <Card className="shadow-card border-border/50">
           <CardHeader>
-            <CardTitle className="text-lg text-foreground">Recent Activity</CardTitle>
+            <CardTitle className="text-base sm:text-lg text-foreground">Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {recentActivities.map((activity, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-smooth"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-smooth"
                 >
-                  <div className="flex items-center space-x-4">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{activity.action}</p>
+                  <div className="flex items-start sm:items-center space-x-3 sm:space-x-4 flex-1">
+                    <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1.5 sm:mt-0"></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{activity.action}</p>
                       <p className="text-xs text-muted-foreground">{activity.plant} • {activity.time}</p>
                     </div>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${activity.status === "Healthy" || activity.status === "Success"
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium self-start sm:self-auto whitespace-nowrap ${activity.status === "Healthy" || activity.status === "Success"
                       ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
                       : activity.status === "Warning"
                         ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
@@ -230,12 +230,12 @@ export default function Dashboard() {
       </main>
 
       {/* Decorative Elements */}
-      <div className="relative py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
-        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
-        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
+      <div className="relative py-6 sm:py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
+        <Sprout className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
+        <Leaf className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
+        <Sprout className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
+        <Leaf className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
+        <Sprout className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
       </div>
     </div>
   );
