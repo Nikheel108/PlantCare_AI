@@ -216,7 +216,7 @@ export default function Login() {
         </div>
 
         {/* Decorative Elements */}
-        <div className="absolute bottom-20 right-20 flex gap-4 opacity-40">
+        <div className="absolute bottom-20 right-20 flex items-center gap-4 opacity-40">
           <Sprout className="h-10 w-10 lg:h-12 lg:w-12 text-white animate-pulse" style={{ animationDelay: '0s' }} />
           <Leaf className="h-10 w-10 lg:h-12 lg:w-12 text-white animate-pulse" style={{ animationDelay: '0.3s' }} />
           <Sprout className="h-10 w-10 lg:h-12 lg:w-12 text-white animate-pulse" style={{ animationDelay: '0.6s' }} />
