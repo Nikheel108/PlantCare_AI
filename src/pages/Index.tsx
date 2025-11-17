@@ -87,7 +87,7 @@ const Index = () => {
               <Button
                 onClick={() => navigate("/login")}
                 size="lg"
-                className="gradient-primary text-white hover:opacity-90 shadow-soft px-6 sm:px-8 py-4 sm:py-5 text-base sm:text-lg min-h-[48px] sm:min-h-[56px] w-full sm:w-auto"
+                className="gradient-primary text-white hover:opacity-90 shadow-soft px-6 sm:px-8 py-4 sm:py-5 text-base sm:text-lg min-h-[48px] sm:min-h-[56px] w-full sm:w-auto flex items-center justify-center"
               >
                 Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -153,7 +153,7 @@ const Index = () => {
             <Button
               onClick={() => navigate("/login")}
               size="lg"
-              className="gradient-primary text-white hover:opacity-90 shadow-soft px-6 sm:px-8 py-4 sm:py-5 text-base sm:text-lg min-h-[48px] sm:min-h-[56px] w-full sm:w-auto max-w-md mx-4"
+              className="gradient-primary text-white hover:opacity-90 shadow-soft px-6 sm:px-8 py-4 sm:py-5 text-base sm:text-lg min-h-[48px] sm:min-h-[56px] w-full sm:w-auto max-w-md mx-4 flex items-center justify-center"
             >
               <Leaf className="mr-2 h-5 w-5" />
               Start Your Plant Journey
@@ -163,7 +163,7 @@ const Index = () => {
       </div>
 
       {/* Decorative Elements */}
-      <div className="relative py-6 sm:py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
+      <div className="relative py-6 sm:py-8 flex items-center justify-center gap-2 opacity-30 pointer-events-none">
         <Sprout className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
         <Leaf className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
         <Sprout className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
