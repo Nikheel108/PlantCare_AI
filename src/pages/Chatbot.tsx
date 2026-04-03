@@ -1,0 +1,376 @@
+import { useState, useRef, useEffect } from "react";
+import { Send, Bot, User, Leaf, Sprout } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Navbar } from "@/components/layout/Navbar";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+interface Message {
+  id: string;
+  text: string;
+  sender: 'user' | 'bot';
+  timestamp: Date;
+}
+
+export default function Chatbot() {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      text: "Hello! I'm your PlantCareAI assistant. I can help you with plant care, disease identification, watering schedules, and more. What would you like to know?",
+      sender: 'bot',
+      timestamp: new Date(Date.now() - 5000)
+    }
+  ]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [apiKey, setApiKey] = useState<string>(import.meta.env.VITE_GEMINI_API_KEY || '');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(!import.meta.env.VITE_GEMINI_API_KEY);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const getGeminiResponse = async (userMessage: string): Promise<string> => {
+    try {
+      if (!apiKey) {
+        return "Please provide your Gemini API key to get AI-powered responses. You can get one from https://makersuite.google.com/app/apikey";
+      }
+
+      const genAI = new GoogleGenerativeAI(apiKey);
+
+      // System prompt for friendly, conversational ChatGPT-style responses
+      const systemInstruction = `You are PlantCareAI, a friendly and knowledgeable plant care assistant. 
+
+Answer ONLY plant-related questions about: plant care, diseases, watering, soil, light, fertilizer, pests, identification, growth tips, and maintenance.
+
+IMPORTANT RULES:
+1. Respond in NATURAL, CONVERSATIONAL language like ChatGPT - be friendly and easy to understand
+2. Use simple, everyday words - avoid overly technical jargon
+3. Break down complex ideas into short, clear paragraphs
+4. Use bullet points or numbers for lists (natural formatting, not JSON)
+5. Include practical, actionable advice users can follow immediately
+6. Be warm and encouraging - make users feel supported
+7. If a question is not about plants, politely say: "I'm specifically designed to help with plant care questions. Feel free to ask me anything about your plants!"
+
+Example response style:
+"Ah, yellow leaves! That's usually a sign your plant is trying to tell you something. The most common reason is overwatering - plants need air around their roots just as much as they need water. Here's what I'd suggest:
+
+1. Check the soil first - stick your finger 1-2 inches in. If it feels soggy, give it a break from watering
+2. Make sure your pot has drainage holes so excess water can escape
+3. If watering seems fine, it could be nutrients...
+
+Don't worry though, it's usually fixable!"
+
+Keep responses concise but helpful. Be conversational, not robotic.`;
+
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-pro",
+        systemInstruction,
+      });
+
+      // Balance between creativity and consistency
+      const generationConfig = {
+        temperature: 0.7,
+        topP: 0.95,
+        topK: 40,
+        maxOutputTokens: 4096,
+      } as const;
+
+      // Build chat history from prior turns for better context
+      const history = messages
+        .filter((m) => m.id !== '1')
+        .map((m) => ({
+          role: m.sender === 'user' ? 'user' : 'model',
+          parts: [{ text: m.text }],
+        }));
+
+      const chatSession = model.startChat({
+        generationConfig,
+        history,
+      });
+
+      const result = await chatSession.sendMessage(userMessage);
+      const response = result.response;
+      const text = response.text();
+
+      return text || "I apologize, but I couldn't generate a response. Please try again.";
+    } catch (error) {
+      console.error('Gemini API Error:', error);
+      if (error instanceof Error) {
+        if (error.message.includes('API key')) {
+          return "Invalid API key. Please check your Gemini API key and try again. Get your key from https://makersuite.google.com/app/apikey";
+        }
+        return `Error: ${error.message}. Please try again.`;
+      }
+      return "I encountered an error while processing your request. Please try again.";
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: inputMessage,
+      sender: 'user',
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    const currentMessage = inputMessage;
+    setInputMessage('');
+    setIsTyping(true);
+
+    try {
+      const responseText = await getGeminiResponse(currentMessage);
+
+      const botResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: responseText,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, botResponse]);
+    } catch (error) {
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "I apologize, but I encountered an error. Please try again.",
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const quickQuestions = [
+    "How often should I water my plants?",
+    "My plant has yellow leaves, what's wrong?",
+    "What's the best fertilizer for houseplants?",
+    "How do I increase humidity for my plants?"
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-bg">
+      <Navbar />
+
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8 animate-fade-in">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
+            Plant Care Assistant
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Get expert advice on plant care, diseases, and maintenance powered by Google Gemini
+          </p>
+        </div>
+
+        {/* API Key Input */}
+        {showApiKeyInput && (
+          <Card className="mb-4 border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20">
+            <CardContent className="pt-4 sm:pt-6">
+              <div className="space-y-3">
+                <div className="flex flex-col gap-2">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-sm sm:text-base mb-1">Gemini API Key Required</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground mb-3">
+                      Get your free API key from{" "}
+                      <a
+                        href="https://makersuite.google.com/app/apikey"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        Google AI Studio
+                      </a>
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Input
+                        type="password"
+                        placeholder="Enter your Gemini API key"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        className="flex-1 h-11 sm:h-12 text-base"
+                      />
+                      <Button
+                        onClick={() => {
+                          if (apiKey.trim()) {
+                            setShowApiKeyInput(false);
+                          }
+                        }}
+                        disabled={!apiKey.trim()}
+                        className="min-h-[44px] sm:min-h-[48px] w-full sm:w-auto"
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card className="shadow-card border-border/50 flex flex-col" style={{ height: 'calc(100vh - 250px)', minHeight: '500px', maxHeight: '700px' }}>
+          <CardHeader className="border-b border-border pb-3 sm:pb-4">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-base sm:text-lg">
+              <div className="flex items-center gap-2">
+                <Bot className="h-5 w-5 text-primary" />
+                PlantCareAI Assistant
+              </div>
+              <div className="flex items-center gap-2 sm:ml-auto">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-xs sm:text-sm text-muted-foreground">Online</span>
+              </div>
+            </CardTitle>
+          </CardHeader>
+
+          {/* Messages Area */}
+          <CardContent className="flex-1 overflow-y-auto p-0">
+            <div className="p-3 sm:p-4 space-y-3 sm:space-y-4 max-h-full">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex items-start gap-2 sm:gap-3 animate-slide-up ${message.sender === 'user' ? 'flex-row-reverse' : ''
+                    }`}
+                >
+                  <Avatar className="w-8 h-8 flex-shrink-0">
+                    <AvatarFallback className={message.sender === 'bot' ? 'bg-primary text-primary-foreground' : 'bg-secondary'}>
+                      {message.sender === 'bot' ? (
+                        <Bot className="h-4 w-4" />
+                      ) : (
+                        <User className="h-4 w-4" />
+                      )}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className={`max-w-[85%] sm:max-w-[80%] ${message.sender === 'user' ? 'text-right' : ''}`}>
+                    <div
+                      className={`rounded-lg px-3 sm:px-4 py-2 ${message.sender === 'user'
+                        ? 'bg-primary text-primary-foreground ml-auto'
+                        : 'bg-secondary text-foreground'
+                        }`}
+                    >
+                      {message.sender === 'bot' ? (
+                        <div className="text-xs sm:text-sm whitespace-pre-wrap space-y-2">
+                          {message.text}
+                        </div>
+                      ) : (
+                        <p className="text-xs sm:text-sm">{message.text}</p>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground mt-1 block">
+                      {formatTime(message.timestamp)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              {isTyping && (
+                <div className="flex items-start gap-2 sm:gap-3 animate-pulse">
+                  <Avatar className="w-8 h-8">
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      <Bot className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="bg-secondary rounded-lg px-3 sm:px-4 py-2">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+          </CardContent>
+
+          {/* Quick Questions */}
+          {messages.length === 1 && (
+            <div className="px-3 sm:px-4 py-2 border-t border-border bg-secondary/20">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-2">Quick questions:</p>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                {quickQuestions.map((question, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs min-h-[36px]"
+                    onClick={() => setInputMessage(question)}
+                  >
+                    {question}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Input Area */}
+          <div className="p-3 sm:p-4 border-t border-border">
+            <div className="flex gap-2">
+              <Input
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask me about plant care..."
+                className="flex-1 h-11 sm:h-12 text-base"
+                disabled={isTyping}
+              />
+              <Button
+                onClick={handleSendMessage}
+                disabled={!inputMessage.trim() || isTyping}
+                className="gradient-primary text-white hover:opacity-90 min-w-[44px] min-h-[44px] sm:min-w-[48px] sm:min-h-[48px]"
+                aria-label="Send message"
+              >
+                <Send className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-2">
+              <p className="text-xs text-muted-foreground">
+                Powered by Intelligent Plant Care AI
+              </p>
+              {!showApiKeyInput && (
+                <button
+                  onClick={() => setShowApiKeyInput(true)}
+                  className="text-xs text-primary hover:underline text-left sm:text-right min-h-[36px] flex items-center"
+                >
+                  Change API Key
+                </button>
+              )}
+            </div>
+          </div>
+        </Card>
+      </main>
+
+      {/* Decorative Elements */}
+      <div className="relative py-6 sm:py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
+        <Sprout className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
+        <Leaf className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
+        <Sprout className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
+        <Leaf className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
+        <Sprout className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
+      </div>
+    </div>
+  );
+}
