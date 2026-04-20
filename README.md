@@ -73,4 +73,4 @@ src/
 
 ## License
 
-MIT
+MIT Licence
