@@ -126,7 +126,8 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
         if (currentUser) {
           setIsSaving(true);
           try {
-            const response = await fetch('http://localhost:5000/api/analysis', {
+            const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+            const response = await fetch(`${backendUrl}/api/analysis`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
