@@ -71,7 +71,7 @@ Don't worry though, it's usually fixable!"
 Keep responses concise but helpful. Be conversational, not robotic.`;
 
       const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-pro",
+        model: "gemini-2.5-flash",
         systemInstruction,
       });
 
@@ -161,6 +161,17 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const formatText = (text: string) => {
+    if (!text) return null;
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={index} className="font-bold">{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
   };
 
   const quickQuestions = [
@@ -272,7 +283,7 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
                     >
                       {message.sender === 'bot' ? (
                         <div className="text-xs sm:text-sm whitespace-pre-wrap space-y-2">
-                          {message.text}
+                          {formatText(message.text)}
                         </div>
                       ) : (
                         <p className="text-xs sm:text-sm">{message.text}</p>

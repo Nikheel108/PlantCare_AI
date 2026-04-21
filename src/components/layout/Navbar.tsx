@@ -3,8 +3,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import plantLogo from "@/assets/plant-logo.png";
+import { useAuth } from "@/contexts/AuthContext";
+
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard" },
@@ -19,12 +21,17 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { currentUser, logout } = useAuth();
   
-  const handleLogout = () => {
-    // Simple logout simulation
-    localStorage.removeItem("isLoggedIn");
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error", error);
+    }
   };
+
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -72,11 +79,15 @@ export function Navbar() {
               aria-label="View profile"
             >
               <Avatar className="h-8 w-8">
+                {currentUser?.photoURL ? (
+                  <AvatarImage src={currentUser.photoURL} alt={currentUser.displayName || ""} />
+                ) : null}
                 <AvatarFallback className="bg-gradient-to-br from-green-400 to-green-600 text-white text-sm">
-                  <User className="h-4 w-4" />
+                  {currentUser?.displayName ? currentUser.displayName.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
                 </AvatarFallback>
               </Avatar>
             </Button>
+
 
             {/* Mobile menu button */}
             <Button

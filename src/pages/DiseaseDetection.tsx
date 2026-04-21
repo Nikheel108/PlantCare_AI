@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Navbar } from "@/components/layout/Navbar";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface DiseaseResult {
   diseaseName: string;
@@ -29,7 +31,9 @@ export default function DiseaseDetection() {
   const [apiKey, setApiKey] = useState<string>(import.meta.env.VITE_GEMINI_API_KEY || '');
   const [showApiKeyInput, setShowApiKeyInput] = useState(!import.meta.env.VITE_GEMINI_API_KEY);
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { currentUser } = useAuth();
 
   const handleImageUpload = (file: File) => {
     const reader = new FileReader();
@@ -76,7 +80,7 @@ export default function DiseaseDetection() {
 
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
       // Convert image to base64 without data URL prefix
       const base64Data = selectedImage.split(',')[1];
@@ -117,6 +121,45 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
         const jsonText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
         const parsedResult: DiseaseResult = JSON.parse(jsonText);
         setResult(parsedResult);
+
+        // Save to backend
+        if (currentUser) {
+          setIsSaving(true);
+          try {
+            const response = await fetch('http://localhost:5000/api/analysis', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                userId: currentUser.uid,
+                userEmail: currentUser.email,
+                image: selectedImage,
+                plantName: "Plant", // Gemini usually identifies the plant, but for now we use a placeholder or can extract from description
+                diseaseName: parsedResult.diseaseName,
+                confidence: parsedResult.confidence,
+                severity: parsedResult.severity,
+                symptoms: parsedResult.symptoms,
+                recommendations: parsedResult.treatment,
+                description: parsedResult.description,
+                causes: parsedResult.causes,
+                prevention: parsedResult.prevention,
+                additionalNotes: parsedResult.additionalNotes
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to save analysis to backend');
+            }
+
+            toast.success("Analysis report sent to your email!");
+          } catch (saveError) {
+            console.error('Error saving to backend:', saveError);
+            toast.error("Analysis complete, but failed to save report/send email.");
+          } finally {
+            setIsSaving(false);
+          }
+        }
       } catch (parseError) {
         console.error('JSON Parse Error:', parseError);
         console.log('Raw response:', text);
@@ -137,6 +180,17 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const formatText = (text: string) => {
+    if (!text) return null;
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={index} className="font-bold">{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
   };
 
   const clearImage = () => {
@@ -311,6 +365,18 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
                       </p>
                     </div>
                   )}
+
+                  {isSaving && (
+                    <div className="mt-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs sm:text-sm text-primary flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Uploading to Cloudinary & Sending Email...
+                        </span>
+                      </div>
+                      <Progress value={90} className="h-2" />
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -348,7 +414,7 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
                     </div>
                     <div className="bg-secondary/30 rounded-lg p-3 sm:p-4">
                       <h4 className="font-medium text-foreground mb-2 text-base sm:text-lg">{result.diseaseName}</h4>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-3">{result.description}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-3">{formatText(result.description)}</p>
                       <div className="flex items-center gap-2">
                         <AlertTriangle className={`h-4 w-4 ${result.severity === "Severe" ? "text-red-500" :
                           result.severity === "Moderate" ? "text-yellow-500" :
@@ -370,7 +436,7 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
                         {result.symptoms.map((symptom: string, index: number) => (
                           <li key={index} className="flex items-start gap-2 sm:gap-3">
                             <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-xs sm:text-sm text-foreground">{symptom}</span>
+                            <span className="text-xs sm:text-sm text-foreground">{formatText(symptom)}</span>
                           </li>
                         ))}
                       </ul>
@@ -387,7 +453,7 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
                         {result.causes.map((cause: string, index: number) => (
                           <li key={index} className="flex items-start gap-2 sm:gap-3">
                             <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-xs sm:text-sm text-foreground">{cause}</span>
+                            <span className="text-xs sm:text-sm text-foreground">{formatText(cause)}</span>
                           </li>
                         ))}
                       </ul>
@@ -406,7 +472,7 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
                             <div className="w-5 h-5 sm:w-6 sm:h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium mt-0.5 flex-shrink-0">
                               {index + 1}
                             </div>
-                            <span className="text-xs sm:text-sm text-foreground">{step}</span>
+                            <span className="text-xs sm:text-sm text-foreground">{formatText(step)}</span>
                           </li>
                         ))}
                       </ul>
@@ -423,7 +489,7 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
                         {result.prevention.map((tip: string, index: number) => (
                           <li key={index} className="flex items-start gap-2 sm:gap-3">
                             <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-xs sm:text-sm text-foreground">{tip}</span>
+                            <span className="text-xs sm:text-sm text-foreground">{formatText(tip)}</span>
                           </li>
                         ))}
                       </ul>
@@ -437,7 +503,7 @@ Be specific and accurate. If the image is not clear or not a plant leaf, mention
                         <Info className="h-4 w-4 text-blue-500" />
                         Additional Notes
                       </h3>
-                      <p className="text-xs sm:text-sm text-muted-foreground">{result.additionalNotes}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">{formatText(result.additionalNotes)}</p>
                     </div>
                   )}
 

@@ -5,16 +5,20 @@ import { Button } from "@/components/ui/button";
 import plantLogo from "@/assets/plant-logo.png";
 import heroPlants from "@/assets/hero-plants.jpg";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 const Index = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+
 
   useEffect(() => {
     // Check if user is already logged in
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    if (isLoggedIn) {
+    if (currentUser) {
       navigate("/dashboard");
     }
-  }, [navigate]);
+  }, [currentUser, navigate]);
+
 
 
 

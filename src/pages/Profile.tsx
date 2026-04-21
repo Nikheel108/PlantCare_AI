@@ -7,26 +7,37 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Navbar } from "@/components/layout/Navbar";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Profile() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { currentUser, logout } = useAuth();
+  
   const [isEditing, setIsEditing] = useState(false);
-  const [userName, setUserName] = useState("Plant Enthusiast");
-  const [userEmail, setUserEmail] = useState("user@plantcareai.com");
+  const [userName, setUserName] = useState(currentUser?.displayName || "Plant Enthusiast");
+  const [userEmail, setUserEmail] = useState(currentUser?.email || "user@plantcareai.com");
   const [tempName, setTempName] = useState(userName);
-  const [profileImage, setProfileImage] = useState("");
+  const [profileImage, setProfileImage] = useState(currentUser?.photoURL || "");
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    toast({
-      title: "Logged out successfully",
-      description: "See you soon! Keep your plants healthy! 🌱",
-    });
-    setTimeout(() => {
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Logged out successfully",
+        description: "See you soon! Keep your plants healthy! 🌱",
+      });
       navigate("/login");
-    }, 1000);
+    } catch (error) {
+      toast({
+        title: "Logout failed",
+        description: "An error occurred while signing out.",
+        variant: "destructive",
+      });
+    }
   };
+
 
   const handleShare = async () => {
     const shareData = {
