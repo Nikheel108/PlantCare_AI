@@ -31,9 +31,12 @@ const sensorSchema = new mongoose.Schema({
   userId: { type: String, required: true, index: true },
   moisture: Number,
   isPumpActive: Boolean,
+  mistActive: Boolean,
   pumpDuration: Number,
   trigger: String,
   plantZone: String,
+  temperature: Number,
+  aqi: Number,
   status: { type: String, default: 'Completed' },
   createdAt: { type: Date, default: Date.now }
 });

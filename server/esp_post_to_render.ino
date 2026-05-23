@@ -33,7 +33,7 @@ ESP8266WebServer server(80);
 WiFiClientSecure secureClient;
 
 unsigned long lastPush = 0;
-const unsigned long PUSH_INTERVAL = 10000UL; // push every 10s
+const unsigned long PUSH_INTERVAL = 5000UL; // push every 5s
 
 void pushToServer(int soilDry, int soilPercent, float temp, int aqi, int pumpActive, int mistActive) {
   if (!WiFi.isConnected()) return;

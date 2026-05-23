@@ -4,6 +4,7 @@ type EspData = {
   temperature?: number;
   aqi?: number;
   soilDry?: number; // 1 dry, 0 moist
+  soilPercent?: number; // 0-100
   pumpActive?: number; // 1 on, 0 off
   mistActive?: number; // 1 on, 0 off
   [key: string]: any;
@@ -19,6 +20,31 @@ type EspContextValue = {
 };
 
 const EspContext = createContext<EspContextValue | undefined>(undefined);
+
+/**
+ * Normalize a backend sensor document into the shape the frontend expects.
+ * Server stores: moisture, isPumpActive (bool), mistActive (bool), temperature, aqi
+ * Frontend expects: soilPercent, soilDry, pumpActive (0|1), mistActive (0|1), temperature, aqi
+ */
+function normalizeBackendData(doc: any): EspData {
+  if (!doc) return {};
+  const soilPercent = typeof doc.moisture === 'number' ? doc.moisture : undefined;
+  const soilDry = typeof soilPercent === 'number' ? (soilPercent < 35 ? 1 : 0) : undefined;
+  const pumpActive = typeof doc.isPumpActive === 'boolean' ? (doc.isPumpActive ? 1 : 0)
+    : typeof doc.pumpActive === 'number' ? doc.pumpActive : undefined;
+  const mistActive = typeof doc.mistActive === 'boolean' ? (doc.mistActive ? 1 : 0)
+    : typeof doc.mistActive === 'number' ? doc.mistActive : undefined;
+
+  return {
+    ...doc,
+    soilPercent,
+    soilDry,
+    pumpActive,
+    mistActive,
+    temperature: doc.temperature,
+    aqi: doc.aqi,
+  };
+}
 
 export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const [espIp, setEspIpState] = useState<string>(() => {
@@ -43,6 +69,9 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
     }
   };
 
+  // Helper: whether we should route through the backend
+  const shouldUseBackend = () => Boolean(BACKEND) && window.location.protocol === 'https:';
+
   useEffect(() => {
     // polling function (uses a reusable one-off fetch)
     let mounted = true;
@@ -53,8 +82,7 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
         return null;
       }
 
-      // If a backend URL is configured and we're on an HTTPS page, prefer fetching from backend
-      const useBackend = Boolean(BACKEND) && window.location.protocol === 'https:';
+      const useBackend = shouldUseBackend();
       try {
         if (useBackend) {
           const controller = new AbortController();
@@ -65,9 +93,10 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
           if (!res.ok) throw new Error('non-ok');
           const json = await res.json();
           if (!mounted) return null;
-          setData(json || {});
+          const normalized = normalizeBackendData(json);
+          setData(normalized);
           setOnline(true);
-          return json;
+          return normalized;
         }
 
         // Fallback: direct local ESP fetch (HTTP). Only used when page is not HTTPS or no backend configured.
@@ -105,8 +134,7 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
 
   const safeFetch = async (path: string) => {
     if (!espIp) return false;
-    const BACKEND = (import.meta.env.VITE_BACKEND_URL || "").toString().trim();
-    const useBackend = Boolean(BACKEND) && window.location.protocol === 'https:';
+    const useBackend = shouldUseBackend();
     if (useBackend) {
       // No remote control implemented via backend; return false to indicate action not available
       console.warn('Remote control via backend not available');
@@ -157,14 +185,19 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
     if (shouldSchedule) {
       if (oneOffTimeoutRef.current) clearTimeout(oneOffTimeoutRef.current);
       oneOffTimeoutRef.current = window.setTimeout(async () => {
+        const useBackend = shouldUseBackend();
         try {
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 3000);
-          const res = await fetch(`http://${espIp}/api/data`, { signal: controller.signal, cache: 'no-store' });
+          const url = useBackend
+            ? `${BACKEND}/api/sensors/latest/${encodeURIComponent(espIp)}`
+            : `http://${espIp}/api/data`;
+          const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
           clearTimeout(timeout);
           if (res && res.ok) {
             const json = await res.json();
-            setData(json || {});
+            const normalized = useBackend ? normalizeBackendData(json) : (json || {});
+            setData(normalized);
             setOnline(true);
           }
         } catch (e) {
