@@ -23,7 +23,7 @@ function EspIpInput() {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onBlur={() => setEspIp(value.trim())}
-        placeholder="ESP IP"
+        placeholder="Device ID or ESP IP"
         className="hidden sm:inline-block px-2 py-1 text-sm rounded-md border border-border bg-transparent text-foreground min-w-[140px]"
       />
     </div>

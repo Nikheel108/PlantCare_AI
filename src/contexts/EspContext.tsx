@@ -23,9 +23,9 @@ const EspContext = createContext<EspContextValue | undefined>(undefined);
 export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const [espIp, setEspIpState] = useState<string>(() => {
     try {
-      return localStorage.getItem("espIp") || "192.168.1.185";
+      return localStorage.getItem("espIp") || "esp-balcony-1";
     } catch {
-      return "192.168.1.185";
+      return "esp-balcony-1";
     }
   });
   const [data, setData] = useState<EspData>({});
