@@ -8,27 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import plantLogo from "@/assets/plant-logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 
-function EspIpInput() {
-  const { espIp, setEspIp, online } = useEsp();
-  const [value, setValue] = useState(espIp || "");
 
-  useEffect(() => {
-    setValue(espIp || "");
-  }, [espIp]);
-
-  return (
-    <div className="flex items-center space-x-2 mr-2">
-      <span className={`w-2 h-2 rounded-full ${online ? 'bg-green-500' : 'bg-red-500'}`} title={online ? 'ESP Online' : 'ESP Offline'} />
-      <input
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onBlur={() => setEspIp(value.trim())}
-        placeholder="Device ID or ESP IP"
-        className="hidden sm:inline-block px-2 py-1 text-sm rounded-md border border-border bg-transparent text-foreground min-w-[140px]"
-      />
-    </div>
-  );
-}
 
 
 const navigation = [
@@ -92,8 +72,10 @@ export function Navbar() {
           {/* Right side actions */}
           <div className="flex items-center space-x-1 sm:space-x-2">
             <ThemeToggle />
-            {/* ESP IP input + status */}
-            <EspIpInput />
+            {/* ESP online status indicator */}
+            <div className="flex items-center mr-2">
+              <span className={`w-2 h-2 rounded-full ${online ? 'bg-green-500' : 'bg-red-500'}`} title={online ? 'ESP Online' : 'ESP Offline'} />
+            </div>
             
             {/* Profile Button */}
             <Button
