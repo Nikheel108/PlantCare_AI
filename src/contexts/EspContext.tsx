@@ -30,6 +30,7 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
   });
   const [data, setData] = useState<EspData>({});
   const [online, setOnline] = useState<boolean>(false);
+  const BACKEND = (import.meta.env.VITE_BACKEND_URL || "").toString().trim();
   const intervalRef = useRef<number | null>(null);
   const oneOffTimeoutRef = useRef<number | null>(null);
 
@@ -51,7 +52,25 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
         setOnline(false);
         return null;
       }
+
+      // If a backend URL is configured and we're on an HTTPS page, prefer fetching from backend
+      const useBackend = Boolean(BACKEND) && window.location.protocol === 'https:';
       try {
+        if (useBackend) {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 3000);
+          // Treat espIp as deviceId when using backend (set espIp to your device id in Navbar)
+          const res = await fetch(`${BACKEND}/api/sensors/latest/${encodeURIComponent(espIp)}`, { signal: controller.signal, cache: 'no-store' });
+          clearTimeout(timeout);
+          if (!res.ok) throw new Error('non-ok');
+          const json = await res.json();
+          if (!mounted) return null;
+          setData(json || {});
+          setOnline(true);
+          return json;
+        }
+
+        // Fallback: direct local ESP fetch (HTTP). Only used when page is not HTTPS or no backend configured.
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 2500);
         const res = await fetch(`http://${espIp}/api/data`, { signal: controller.signal, cache: "no-store" });
@@ -86,6 +105,13 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
 
   const safeFetch = async (path: string) => {
     if (!espIp) return false;
+    const BACKEND = (import.meta.env.VITE_BACKEND_URL || "").toString().trim();
+    const useBackend = Boolean(BACKEND) && window.location.protocol === 'https:';
+    if (useBackend) {
+      // No remote control implemented via backend; return false to indicate action not available
+      console.warn('Remote control via backend not available');
+      return false;
+    }
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 3000);
