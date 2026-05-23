@@ -16,6 +16,7 @@ import PlantTypes from "./pages/PlantTypes";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { EspProvider } from "./contexts/EspContext";
 
 
 
@@ -28,7 +29,8 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+            <EspProvider>
+            <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
@@ -42,8 +44,8 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-
           </BrowserRouter>
+          </EspProvider>
         </TooltipProvider>
       </ThemeProvider>
     </AuthProvider>

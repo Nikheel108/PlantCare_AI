@@ -6,13 +6,28 @@ import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Navbar } from "@/components/layout/Navbar";
+import { useEsp } from "@/contexts/EspContext";
 
 export default function AutoWatering() {
   const [isAutoMode, setIsAutoMode] = useState(true);
   const [isPumpActive, setIsPumpActive] = useState(false);
   const [soilMoisture, setSoilMoisture] = useState(45);
+  const [isMistActive, setIsMistActive] = useState(false);
   const [pumpDuration, setPumpDuration] = useState(0);
   const [lastWatering, setLastWatering] = useState("2 hours ago");
+
+  const { data, togglePump, toggleMist } = useEsp();
+
+  // Sync incoming ESP data into UI states
+  useEffect(() => {
+    if (typeof data.pumpActive === 'number') setIsPumpActive(data.pumpActive === 1);
+    if (typeof data.soilPercent === 'number') {
+      setSoilMoisture(Math.max(0, Math.min(100, Math.round(data.soilPercent))));
+    } else if (typeof data.soilDry === 'number') {
+      setSoilMoisture(data.soilDry === 1 ? 25 : 70);
+    }
+    if (typeof data.mistActive === 'number') setIsMistActive(data.mistActive === 1);
+  }, [data]);
 
   // Simulate real-time moisture data
   useEffect(() => {
@@ -53,15 +68,24 @@ export default function AutoWatering() {
 
   const handleManualWatering = () => {
     if (!isPumpActive) {
-      setIsPumpActive(true);
-      setPumpDuration(15);
-      setLastWatering("Just now");
+      // request ESP to turn pump on
+      togglePump(true).then(success => {
+        if (success) {
+          setIsPumpActive(true);
+          setPumpDuration(15);
+          setLastWatering("Just now");
+        }
+      });
     }
   };
 
   const stopPump = () => {
-    setIsPumpActive(false);
-    setPumpDuration(0);
+    togglePump(false).then(success => {
+      if (success) {
+        setIsPumpActive(false);
+        setPumpDuration(0);
+      }
+    });
   };
 
   const getMoistureStatus = () => {
@@ -155,6 +179,21 @@ export default function AutoWatering() {
                 >
                   <Droplets className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                   Start Watering
+                </Button>
+
+                <Button
+                  onClick={() => {
+                    // toggle mist
+                    toggleMist(!isMistActive).then(success => {
+                      if (success) setIsMistActive(prev => !prev);
+                    });
+                  }}
+                  variant={isMistActive ? undefined : "outline"}
+                  className="w-full mt-2 min-h-[48px]"
+                  size="lg"
+                >
+                  <Droplets className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  {isMistActive ? 'Stop Mist' : 'Start Mist'}
                 </Button>
 
                 {isPumpActive && (

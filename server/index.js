@@ -14,6 +14,13 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json({ limit: '10mb' })); // Increased limit for base64 images
 
+// Simple API key middleware for device POSTs
+function requireApiKey(req, res, next) {
+  const key = req.header('x-api-key') || '';
+  if (key && process.env.SENSOR_API_KEY && key === process.env.SENSOR_API_KEY) return next();
+  return res.status(401).json({ error: 'Unauthorized' });
+}
+
 // Cloudinary Configuration
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -193,7 +200,7 @@ app.get('/api/chat/:userId', async (req, res) => {
 });
 
 // 3. Sensor Data
-app.post('/api/sensors', async (req, res) => {
+app.post('/api/sensors', requireApiKey, async (req, res) => {
   try {
     const data = new SensorData(req.body);
     await data.save();
@@ -207,6 +214,17 @@ app.get('/api/sensors/:userId', async (req, res) => {
   try {
     const results = await SensorData.find({ userId: req.params.userId }).sort({ createdAt: -1 });
     res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Convenience endpoint: latest sensor document for a userId
+app.get('/api/sensors/latest/:userId', async (req, res) => {
+  try {
+    const doc = await SensorData.findOne({ userId: req.params.userId }).sort({ createdAt: -1 });
+    if (!doc) return res.status(404).json({ error: 'No data' });
+    res.json(doc);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Camera, Droplets, MessageSquare, TrendingUp, Leaf, Activity, Sprout } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/layout/Navbar";
+import { useEsp } from "@/contexts/EspContext";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -13,8 +15,14 @@ export default function Dashboard() {
   const [humidity, setHumidity] = useState(58);
   const [plantsHealth, setPlantsHealth] = useState(92);
 
+  const { data, online } = useEsp();
+  
+
   // Simulate real-time data updates
   useEffect(() => {
+    // If ESP provides soilDry, skip simulation; otherwise simulate values
+    if (typeof data?.soilDry === 'number') return;
+
     const interval = setInterval(() => {
       setSoilMoisture(prev => Math.max(20, Math.min(100, prev + (Math.random() - 0.5) * 4)));
       setTemperature(prev => Math.max(18, Math.min(28, prev + (Math.random() - 0.5) * 2)));
@@ -23,7 +31,23 @@ export default function Dashboard() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [data?.soilDry]);
+
+  // Map ESP soilDry binary value to a percentage for UI
+  useEffect(() => {
+    if (typeof data?.soilPercent === 'number') {
+      setSoilMoisture(Math.max(0, Math.min(100, Math.round(data.soilPercent))));
+      return;
+    }
+    if (typeof data?.soilDry === 'number') {
+      // ESP: digitalRead -> HIGH (1) means dry, LOW (0) means moist
+      const mapped = data.soilDry === 1 ? 18 : 76; // representative percentages
+      setSoilMoisture(mapped);
+    }
+  }, [data?.soilPercent, data?.soilDry]);
+
+  const displayTemperature = typeof data?.temperature === 'number' ? data.temperature : temperature;
+  const displayAQI = typeof data?.aqi === 'number' ? data.aqi : null;
 
   const quickActions = [
     {
@@ -82,6 +106,45 @@ export default function Dashboard() {
           </p>
         </div>
 
+        {/* Sensors & LED Status */}
+        <div className="mb-6 sm:mb-8">
+          <Card className="shadow-card border-border/50">
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-foreground">Sensors & LEDs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-center">
+                <div className="col-span-2">
+                  <p className="text-xs text-muted-foreground">Temperature</p>
+                  <p className="font-semibold text-lg">{displayTemperature.toFixed(1)}°C</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">AQI</p>
+                  <p className="font-semibold text-lg">{displayAQI !== null ? displayAQI : '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Soil</p>
+                  <p className="font-semibold text-lg">{soilMoisture.toFixed(0)}%</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col text-xs text-muted-foreground">
+                    <span>LED Green</span>
+                    <span>LED Yellow</span>
+                    <span>LED Blue</span>
+                    <span>LED Red</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className={`w-4 h-4 rounded-full ${online ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    <span className={`w-4 h-4 rounded-full ${data.pumpActive === 1 ? 'bg-yellow-400' : 'bg-gray-300'}`} />
+                    <span className={`w-4 h-4 rounded-full ${data.mistActive === 1 ? 'bg-blue-500' : 'bg-gray-300'}`} />
+                    <span className={`w-4 h-4 rounded-full ${(typeof data.aqi === 'number' && data.aqi > 400) ? 'bg-red-500' : 'bg-gray-300'}`} />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card className="hover-lift shadow-card border-border/50">
@@ -114,7 +177,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-                {temperature.toFixed(1)}°C
+                {displayTemperature.toFixed(1)}°C
               </div>
               <div className="text-xs text-muted-foreground">
                 Perfect growing conditions
@@ -142,21 +205,23 @@ export default function Dashboard() {
           <Card className="hover-lift shadow-card border-border/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Plants Health
+                Air Quality
               </CardTitle>
-              <Leaf className="h-4 w-4 text-green-600" />
+              <Activity className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-                {plantsHealth.toFixed(0)}%
+                {displayAQI !== null ? displayAQI : plantsHealth.toFixed(0)}{displayAQI !== null ? '' : '%'}
               </div>
-              <Progress
-                value={plantsHealth}
-                className="h-2"
-              />
-              <p className="text-xs text-muted-foreground mt-2">
-                All systems healthy
-              </p>
+              {displayAQI === null ? (
+                <Progress
+                  value={plantsHealth}
+                  className="h-2"
+                />
+              ) : null}
+              <div className="text-xs text-muted-foreground mt-2">
+                {displayAQI !== null ? 'AQI from sensor' : 'All systems healthy'}
+              </div>
             </CardContent>
           </Card>
         </div>
