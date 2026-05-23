@@ -25,6 +25,7 @@ export function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
+  const { online } = useEsp();
   
   const handleLogout = async () => {
     try {
