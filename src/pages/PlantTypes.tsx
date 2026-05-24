@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Search, Droplets, Sun, ThermometerSun, Leaf, Sprout } from "lucide-react";
+import { Search, Droplets, Sun, ThermometerSun, Leaf } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Navbar } from "@/components/layout/Navbar";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { motion } from "framer-motion";
+
 
 interface Plant {
   id: number;
@@ -193,26 +195,23 @@ export default function PlantTypes() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case "Easy": return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
-      case "Medium": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400";
-      case "Hard": return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
-      default: return "bg-gray-100 text-gray-800";
+      case "Easy": return "bg-neon-green/10 text-neon-green border-neon-green/20";
+      case "Medium": return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
+      case "Hard": return "bg-red-500/10 text-red-400 border-red-500/20";
+      default: return "bg-white/10 text-white/40";
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-bg">
-      <Navbar />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="mb-6 sm:mb-8 animate-fade-in">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
-            Plant Types & Care Guide
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Explore different plant varieties and learn how to care for them
-          </p>
-        </div>
+    <DashboardLayout particles="leaf">
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-white mb-1">
+          Plant Types <span className="text-neon">& Care Guide</span>
+        </h1>
+        <p className="text-sm text-white/35">
+          Explore different <strong className="text-white/55">plant varieties</strong> and learn how to care for them
+        </p>
+      </motion.div>
 
         {/* Search and Filter */}
         <div className="mb-6 sm:mb-8 space-y-3 sm:space-y-4">
@@ -343,16 +342,6 @@ export default function PlantTypes() {
             </p>
           </div>
         )}
-      </main>
-
-      {/* Decorative Elements */}
-      <div className="relative py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
-        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
-        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
-      </div>
-    </div>
+    </DashboardLayout>
   );
 }

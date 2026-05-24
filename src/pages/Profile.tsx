@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Mail, LogOut, Share2, Camera, Edit2, Check, Leaf, Sprout } from "lucide-react";
+import { User, Mail, LogOut, Share2, Camera, Edit2, Check, Leaf, Sprout, Search, Calendar, Heart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Navbar } from "@/components/layout/Navbar";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { GlassCard } from "@/components/ui/GlassCard";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { motion } from "framer-motion";
+
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -26,7 +29,7 @@ export default function Profile() {
       await logout();
       toast({
         title: "Logged out successfully",
-        description: "See you soon! Keep your plants healthy! 🌱",
+        description: "See you soon! Keep your plants healthy.",
       });
       navigate("/login");
     } catch (error) {
@@ -42,7 +45,7 @@ export default function Profile() {
   const handleShare = async () => {
     const shareData = {
       title: "PlantCareAI",
-      text: "Check out PlantCareAI - Your intelligent plant care companion! 🌿",
+      text: "Check out PlantCareAI - Your intelligent plant care companion!",
       url: window.location.origin,
     };
 
@@ -50,8 +53,8 @@ export default function Profile() {
       if (navigator.share) {
         await navigator.share(shareData);
         toast({
-          title: "Shared successfully!",
-          description: "Thanks for spreading the word! 🌱",
+          title: "Shared successfully",
+          description: "Thanks for spreading the word!",
         });
       } else {
         // Fallback: Copy to clipboard
@@ -87,25 +90,22 @@ export default function Profile() {
   };
 
   const stats = [
-    { label: "Plants Monitored", value: "12", icon: "🌱" },
-    { label: "Scans Completed", value: "48", icon: "🔍" },
-    { label: "Days Active", value: "23", icon: "📅" },
-    { label: "Health Score", value: "92%", icon: "💚" },
+    { label: "Plants Monitored", value: "12", icon: Sprout },
+    { label: "Scans Completed", value: "48", icon: Search },
+    { label: "Days Active", value: "23", icon: Calendar },
+    { label: "Health Score", value: "92%", icon: Heart },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-bg">
-      <Navbar />
-
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="mb-6 sm:mb-8 animate-fade-in">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
-            My Profile
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Manage your account and preferences
-          </p>
-        </div>
+    <DashboardLayout>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-white mb-1">
+          My <span className="text-neon">Profile</span>
+        </h1>
+        <p className="text-sm text-white/35">
+          Manage your <strong className="text-white/55">account and preferences</strong>
+        </p>
+      </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Profile Card */}
@@ -251,7 +251,7 @@ export default function Profile() {
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardContent className="p-6 text-center">
-                <div className="text-3xl mb-2">{stat.icon}</div>
+                <div className="text-3xl mb-2"><stat.icon className="h-7 w-7 text-neon-green mx-auto" /></div>
                 <div className="text-2xl font-bold text-foreground mb-1">
                   {stat.value}
                 </div>
@@ -287,16 +287,6 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
-      </main>
-
-      {/* Decorative Elements */}
-      <div className="relative py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
-        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
-        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
-      </div>
-    </div>
+    </DashboardLayout>
   );
 }

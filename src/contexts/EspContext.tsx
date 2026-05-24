@@ -47,13 +47,7 @@ function normalizeBackendData(doc: any): EspData {
 }
 
 export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  const [espIp, setEspIpState] = useState<string>(() => {
-    try {
-      return localStorage.getItem("espIp") || "esp-balcony-1";
-    } catch {
-      return "esp-balcony-1";
-    }
-  });
+  const [espIp, setEspIpState] = useState<string>("192.168.x.x");
   const [data, setData] = useState<EspData>({});
   const [online, setOnline] = useState<boolean>(false);
   const BACKEND = (import.meta.env.VITE_BACKEND_URL || "").toString().trim();
@@ -70,7 +64,7 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
   };
 
   // Helper: whether we should route through the backend
-  const shouldUseBackend = () => Boolean(BACKEND) && window.location.protocol === 'https:';
+  const shouldUseBackend = () => Boolean(BACKEND);
 
   useEffect(() => {
     // polling function (uses a reusable one-off fetch)
@@ -87,15 +81,27 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
         if (useBackend) {
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 3000);
-          // Treat espIp as deviceId when using backend (set espIp to your device id in Navbar)
-          const res = await fetch(`${BACKEND}/api/sensors/latest/${encodeURIComponent(espIp)}`, { signal: controller.signal, cache: 'no-store' });
+          // Hardcode device ID for cloud, use espIp strictly for local commands
+          const res = await fetch(`${BACKEND}/api/sensors/latest/esp-balcony-1`, { signal: controller.signal, cache: 'no-store' });
           clearTimeout(timeout);
           if (!res.ok) throw new Error('non-ok');
           const json = await res.json();
           if (!mounted) return null;
           const normalized = normalizeBackendData(json);
           setData(normalized);
-          setOnline(true);
+          
+          // If the data is older than 15 seconds, the ESP has stopped pushing data
+          if (json.createdAt) {
+            const dataTime = new Date(json.createdAt).getTime();
+            if (Date.now() - dataTime > 15000) {
+              setOnline(false);
+            } else {
+              setOnline(true);
+            }
+          } else {
+            setOnline(true);
+          }
+          
           return normalized;
         }
 
@@ -134,12 +140,6 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
 
   const safeFetch = async (path: string) => {
     if (!espIp) return false;
-    const useBackend = shouldUseBackend();
-    if (useBackend) {
-      // No remote control implemented via backend; return false to indicate action not available
-      console.warn('Remote control via backend not available');
-      return false;
-    }
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 3000);
@@ -148,12 +148,30 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
       if (!res.ok) throw new Error("non-ok");
       return res;
     } catch (e) {
-      setOnline(false);
+      console.warn("Direct ESP command failed:", e);
       return false;
     }
   };
 
   const togglePump = async (on: boolean) => {
+    if (shouldUseBackend()) {
+      try {
+        const res = await fetch(`${BACKEND}/api/commands`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ deviceId: 'esp-balcony-1', pumpCommand: on ? "on" : "off" })
+        });
+        if (res.ok) {
+          setData(prev => ({ ...prev, pumpActive: on ? 1 : 0 }));
+          setOnline(true);
+          return true;
+        }
+      } catch (e) {
+        console.warn("Cloud command failed:", e);
+      }
+      return false;
+    }
+
     const res = await safeFetch(`/api/pump/${on ? "on" : "off"}`);
     if (res) {
       setData(prev => ({ ...prev, pumpActive: on ? 1 : 0 }));
@@ -164,6 +182,24 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
   };
 
   const toggleMist = async (on: boolean) => {
+    if (shouldUseBackend()) {
+      try {
+        const res = await fetch(`${BACKEND}/api/commands`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ deviceId: 'esp-balcony-1', mistCommand: on ? "on" : "off" })
+        });
+        if (res.ok) {
+          setData(prev => ({ ...prev, mistActive: on ? 1 : 0 }));
+          setOnline(true);
+          return true;
+        }
+      } catch (e) {
+        console.warn("Cloud command failed:", e);
+      }
+      return false;
+    }
+
     const res = await safeFetch(`/api/mist/${on ? "on" : "off"}`);
     if (res) {
       setData(prev => ({ ...prev, mistActive: on ? 1 : 0 }));
@@ -190,7 +226,7 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 3000);
           const url = useBackend
-            ? `${BACKEND}/api/sensors/latest/${encodeURIComponent(espIp)}`
+            ? `${BACKEND}/api/sensors/latest/esp-balcony-1`
             : `http://${espIp}/api/data`;
           const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
           clearTimeout(timeout);
@@ -198,7 +234,13 @@ export const EspProvider: React.FC<React.PropsWithChildren<{}>> = ({ children })
             const json = await res.json();
             const normalized = useBackend ? normalizeBackendData(json) : (json || {});
             setData(normalized);
-            setOnline(true);
+            
+            if (useBackend && json.createdAt) {
+              const dataTime = new Date(json.createdAt).getTime();
+              setOnline(Date.now() - dataTime <= 15000);
+            } else {
+              setOnline(true);
+            }
           }
         } catch (e) {
           setOnline(false);

@@ -2,7 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { Analysis, Chat, SensorData } from './models.js';
+import { Analysis, Chat, SensorData, DeviceCommand } from './models.js';
 import { v2 as cloudinary } from 'cloudinary';
 import nodemailer from 'nodemailer';
 
@@ -204,7 +204,29 @@ app.post('/api/sensors', requireApiKey, async (req, res) => {
   try {
     const data = new SensorData(req.body);
     await data.save();
-    res.status(201).json(data);
+
+    // Check for pending commands
+    const deviceId = req.body.userId;
+    let pendingCommands = null;
+    if (deviceId) {
+      const commandDoc = await DeviceCommand.findOne({ deviceId });
+      if (commandDoc && (commandDoc.pumpCommand || commandDoc.mistCommand)) {
+        pendingCommands = {
+          pumpCommand: commandDoc.pumpCommand,
+          mistCommand: commandDoc.mistCommand
+        };
+        // Clear the commands after sending them
+        commandDoc.pumpCommand = null;
+        commandDoc.mistCommand = null;
+        await commandDoc.save();
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      data,
+      commands: pendingCommands
+    });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -225,6 +247,27 @@ app.get('/api/sensors/latest/:userId', async (req, res) => {
     const doc = await SensorData.findOne({ userId: req.params.userId }).sort({ createdAt: -1 });
     if (!doc) return res.status(404).json({ error: 'No data' });
     res.json(doc);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4. Remote Commands
+app.post('/api/commands', async (req, res) => {
+  const { deviceId, pumpCommand, mistCommand } = req.body;
+  if (!deviceId) return res.status(400).json({ error: 'deviceId required' });
+  
+  try {
+    let commandDoc = await DeviceCommand.findOne({ deviceId });
+    if (!commandDoc) {
+      commandDoc = new DeviceCommand({ deviceId });
+    }
+    if (pumpCommand !== undefined) commandDoc.pumpCommand = pumpCommand;
+    if (mistCommand !== undefined) commandDoc.mistCommand = mistCommand;
+    commandDoc.updatedAt = Date.now();
+    await commandDoc.save();
+    
+    res.json({ success: true, commands: commandDoc });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

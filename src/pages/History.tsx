@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calendar, Filter, Download, Eye, Search, Leaf, Sprout } from "lucide-react";
+import { Calendar, Filter, Download, Eye, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Navbar } from "@/components/layout/Navbar";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { motion } from "framer-motion";
+
 
 interface DetectionRecord {
   id: string;
@@ -144,48 +147,42 @@ export default function History() {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'healthy':
-      case 'completed':
-      case 'treated':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
-      case 'in progress':
-      case 'monitoring':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+      case 'healthy': case 'completed': case 'treated':
+        return 'bg-neon-green/10 text-neon-green border-neon-green/20';
+      case 'in progress': case 'monitoring':
+        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
       case 'error':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+        return 'bg-red-500/10 text-red-400 border-red-500/20';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+        return 'bg-white/10 text-white/40 border-white/10';
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity.toLowerCase()) {
       case 'none':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+        return 'bg-neon-green/10 text-neon-green border-neon-green/20';
       case 'mild':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
       case 'moderate':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400';
+        return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
       case 'severe':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+        return 'bg-red-500/10 text-red-400 border-red-500/20';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+        return 'bg-white/10 text-white/40 border-white/10';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-bg">
-      <Navbar />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="mb-6 sm:mb-8 animate-fade-in">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
-            Activity History
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Track your plant care activities and monitoring results
-          </p>
-        </div>
+    <DashboardLayout>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-white mb-1">
+          Activity <span className="text-neon">History</span>
+        </h1>
+        <p className="text-sm text-white/35">
+          Track your <strong className="text-white/55">plant care activities</strong> and monitoring results
+        </p>
+      </motion.div>
 
         {/* Filters */}
         <Card className="shadow-card border-border/50 mb-4 sm:mb-6">
@@ -374,16 +371,6 @@ export default function History() {
             </Card>
           </TabsContent>
         </Tabs>
-      </main>
-
-      {/* Decorative Elements */}
-      <div className="relative py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
-        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
-        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
-      </div>
-    </div>
+    </DashboardLayout>
   );
 }

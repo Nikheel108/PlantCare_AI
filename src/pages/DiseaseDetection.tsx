@@ -1,11 +1,12 @@
 import { useState, useRef } from "react";
-import { Upload, Camera, X, CheckCircle, AlertTriangle, Info, Loader2, Leaf, Sprout } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Upload, Camera, X, CheckCircle, AlertTriangle, Info, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Navbar } from "@/components/layout/Navbar";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { GlassCard } from "@/components/ui/GlassCard";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -28,7 +29,7 @@ export default function DiseaseDetection() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<DiseaseResult | null>(null);
   const [dragActive, setDragActive] = useState(false);
-  const [apiKey, setApiKey] = useState<string>(import.meta.env.VITE_GEMINI_API_KEY || '');
+  const [apiKey, setApiKey] = useState<string>(import.meta.env.VITE_GEMINI_API_KEY || "");
   const [showApiKeyInput, setShowApiKeyInput] = useState(!import.meta.env.VITE_GEMINI_API_KEY);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -37,510 +38,170 @@ export default function DiseaseDetection() {
 
   const handleImageUpload = (file: File) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setSelectedImage(e.target?.result as string);
-      setSelectedFile(file);
-      setResult(null);
-      setError(null);
-    };
+    reader.onload = (e) => { setSelectedImage(e.target?.result as string); setSelectedFile(file); setResult(null); setError(null); };
     reader.readAsDataURL(file);
   };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragActive(false);
-
-    const files = e.dataTransfer.files;
-    if (files && files[0] && files[0].type.startsWith('image/')) {
-      handleImageUpload(files[0]);
-    }
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files[0]) {
-      handleImageUpload(files[0]);
-    }
-  };
+  const handleDrop = (e: React.DragEvent) => { e.preventDefault(); setDragActive(false); const f = e.dataTransfer.files; if (f?.[0]?.type.startsWith("image/")) handleImageUpload(f[0]); };
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => { if (e.target.files?.[0]) handleImageUpload(e.target.files[0]); };
+  const clearImage = () => { setSelectedImage(null); setSelectedFile(null); setResult(null); setError(null); if (fileInputRef.current) fileInputRef.current.value = ""; };
 
   const analyzeImage = async () => {
-    if (!apiKey) {
-      setError("Please provide your Gemini API key to analyze images.");
-      setShowApiKeyInput(true);
-      return;
-    }
-
-    if (!selectedFile || !selectedImage) {
-      setError("Please select an image first.");
-      return;
-    }
-
-    setIsAnalyzing(true);
-    setError(null);
-
+    if (!apiKey) { setError("Please provide your Gemini API key."); setShowApiKeyInput(true); return; }
+    if (!selectedFile || !selectedImage) { setError("Please select an image first."); return; }
+    setIsAnalyzing(true); setError(null);
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-      // Convert image to base64 without data URL prefix
-      const base64Data = selectedImage.split(',')[1];
-
-      const imageParts = [
-        {
-          inlineData: {
-            data: base64Data,
-            mimeType: selectedFile.type
-          }
-        }
-      ];
-
-      const prompt = `You are an expert plant pathologist. Analyze this leaf image and provide a detailed disease diagnosis.
-
-Provide your response in the following JSON format (respond ONLY with valid JSON, no additional text):
-{
-  "diseaseName": "Name of the disease or 'Healthy' if no disease detected",
-  "confidence": "High/Medium/Low",
-  "severity": "Mild/Moderate/Severe/None",
-  "description": "Brief description of the condition",
-  "symptoms": ["List of visible symptoms"],
-  "causes": ["Possible causes of this condition"],
-  "treatment": ["Step-by-step treatment recommendations"],
-  "prevention": ["Prevention measures for future"],
-  "additionalNotes": "Any additional important information"
-}
-
-Be specific and accurate. If the image is not clear or not a plant leaf, mention that in the diseaseName field.`;
-
-      const result = await model.generateContent([prompt, ...imageParts]);
-      const response = await result.response;
-      const text = response.text();
-
-      // Parse the JSON response
-      try {
-        // Remove markdown code blocks if present
-        const jsonText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-        const parsedResult: DiseaseResult = JSON.parse(jsonText);
-        setResult(parsedResult);
-
-        // Save to backend
-        if (currentUser) {
-          setIsSaving(true);
-          try {
-            const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-            const response = await fetch(`${backendUrl}/api/analysis`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                userId: currentUser.uid,
-                userEmail: currentUser.email,
-                image: selectedImage,
-                plantName: "Plant", // Gemini usually identifies the plant, but for now we use a placeholder or can extract from description
-                diseaseName: parsedResult.diseaseName,
-                confidence: parsedResult.confidence,
-                severity: parsedResult.severity,
-                symptoms: parsedResult.symptoms,
-                recommendations: parsedResult.treatment,
-                description: parsedResult.description,
-                causes: parsedResult.causes,
-                prevention: parsedResult.prevention,
-                additionalNotes: parsedResult.additionalNotes
-              }),
-            });
-
-            if (!response.ok) {
-              throw new Error('Failed to save analysis to backend');
-            }
-
-            toast.success("Analysis report sent to your email!");
-          } catch (saveError) {
-            console.error('Error saving to backend:', saveError);
-            toast.error("Analysis complete, but failed to save report/send email.");
-          } finally {
-            setIsSaving(false);
-          }
-        }
-      } catch (parseError) {
-        console.error('JSON Parse Error:', parseError);
-        console.log('Raw response:', text);
-        setError("Failed to parse AI response. Please try again.");
+      const base64 = selectedImage.split(",")[1];
+      const prompt = `You are an expert plant pathologist. Analyze this leaf image and provide a detailed disease diagnosis.\n\nProvide your response in the following JSON format (respond ONLY with valid JSON, no additional text):\n{"diseaseName":"Name of the disease or 'Healthy'","confidence":"High/Medium/Low","severity":"Mild/Moderate/Severe/None","description":"Brief description","symptoms":["symptoms"],"causes":["causes"],"treatment":["treatments"],"prevention":["prevention tips"],"additionalNotes":"any notes"}\n\nBe specific and accurate.`;
+      const r = await model.generateContent([prompt, { inlineData: { data: base64, mimeType: selectedFile.type } }]);
+      const text = (await r.response).text();
+      const json = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      const parsed: DiseaseResult = JSON.parse(json);
+      setResult(parsed);
+      if (currentUser) {
+        setIsSaving(true);
+        try {
+          const url = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+          const resp = await fetch(`${url}/api/analysis`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: currentUser.uid, userEmail: currentUser.email, image: selectedImage, plantName: "Plant", diseaseName: parsed.diseaseName, confidence: parsed.confidence, severity: parsed.severity, symptoms: parsed.symptoms, recommendations: parsed.treatment, description: parsed.description, causes: parsed.causes, prevention: parsed.prevention, additionalNotes: parsed.additionalNotes }) });
+          if (!resp.ok) throw new Error("Save failed");
+          toast.success("Analysis report sent to your email");
+        } catch { toast.error("Analysis complete, but report save failed"); } finally { setIsSaving(false); }
       }
-    } catch (error) {
-      console.error('Gemini API Error:', error);
-      if (error instanceof Error) {
-        if (error.message.includes('API key')) {
-          setError("Invalid API key. Please check your Gemini API key.");
-          setShowApiKeyInput(true);
-        } else {
-          setError(`Error: ${error.message}`);
-        }
-      } else {
-        setError("Failed to analyze image. Please try again.");
-      }
-    } finally {
-      setIsAnalyzing(false);
-    }
+    } catch (err: any) {
+      if (err?.message?.includes("API key")) { setError("Invalid API key."); setShowApiKeyInput(true); } else setError(err?.message || "Analysis failed. Try again.");
+    } finally { setIsAnalyzing(false); }
   };
 
-  const formatText = (text: string) => {
-    if (!text) return null;
-    const parts = text.split(/(\*\*.*?\*\*)/g);
-    return parts.map((part, index) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={index} className="font-bold">{part.slice(2, -2)}</strong>;
-      }
-      return part;
-    });
-  };
-
-  const clearImage = () => {
-    setSelectedImage(null);
-    setSelectedFile(null);
-    setResult(null);
-    setError(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
+  const formatText = (t: string) => { if (!t) return null; return t.split(/(\*\*.*?\*\*)/g).map((p, i) => p.startsWith("**") && p.endsWith("**") ? <strong key={i} className="font-bold text-white">{p.slice(2, -2)}</strong> : p); };
+  const sevColor = (s: string) => s === "Severe" ? "text-red-400" : s === "Moderate" ? "text-yellow-400" : s === "Mild" ? "text-orange-400" : "text-neon-green";
 
   return (
-    <div className="min-h-screen bg-gradient-bg">
-      <Navbar />
+    <DashboardLayout particles="leaf">
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-white mb-1">
+          Plant <span className="text-neon">Disease Detection</span>
+        </h1>
+        <p className="text-sm text-white/35">Upload a photo for <strong className="text-white/55">AI-powered disease analysis</strong></p>
+      </motion.div>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="mb-6 sm:mb-8 animate-fade-in">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
-            Plant Disease Detection
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Upload a photo of your plant leaf for AI-powered disease analysis using Google Gemini Vision
-          </p>
-        </div>
-
-        {/* API Key Input */}
+      {/* API Key */}
+      <AnimatePresence>
         {showApiKeyInput && (
-          <Card className="mb-4 border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20">
-            <CardContent className="pt-4 sm:pt-6">
-              <div className="space-y-3">
-                <div className="flex flex-col gap-2">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-sm sm:text-base mb-1">Gemini API Key Required</h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground mb-3">
-                      Get your free API key from{" "}
-                      <a
-                        href="https://makersuite.google.com/app/apikey"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        Google AI Studio
-                      </a>
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <Input
-                        type="password"
-                        placeholder="Enter your Gemini API key"
-                        value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                        className="flex-1 h-11 sm:h-12 text-base"
-                      />
-                      <Button
-                        onClick={() => {
-                          if (apiKey.trim()) {
-                            setShowApiKeyInput(false);
-                            setError(null);
-                          }
-                        }}
-                        disabled={!apiKey.trim()}
-                        className="min-h-[44px] sm:min-h-[48px] w-full sm:w-auto"
-                      >
-                        Save
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="mb-4">
+            <GlassCard hover={false} className="border-yellow-500/10">
+              <p className="text-sm font-heading font-semibold text-white mb-2">Gemini API Key Required</p>
+              <p className="text-xs text-white/30 mb-3">Get a free key from <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-neon-green hover:underline">Google AI Studio</a></p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Input type="password" placeholder="Enter API key" value={apiKey} onChange={(e) => setApiKey(e.target.value)} className="flex-1 h-10 bg-white/[0.04] border-white/[0.06] text-white placeholder:text-white/20 text-sm" />
+                <Button onClick={() => { if (apiKey.trim()) { setShowApiKeyInput(false); setError(null); } }} disabled={!apiKey.trim()} className="btn-neon h-10">Save</Button>
               </div>
-            </CardContent>
-          </Card>
+            </GlassCard>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* Error Display */}
+      {/* Error */}
+      <AnimatePresence>
         {error && (
-          <Card className="mb-4 border-red-500/50 bg-red-50 dark:bg-red-950/20">
-            <CardContent className="pt-4 sm:pt-6">
-              <div className="flex items-start gap-2 text-red-600 dark:text-red-400">
-                <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                <p className="text-xs sm:text-sm font-medium">{error}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-4">
+            <GlassCard hover={false} className="border-red-500/10">
+              <div className="flex items-start gap-2 text-red-400"><AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" /><p className="text-xs font-medium">{error}</p></div>
+            </GlassCard>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-          {/* Upload Section */}
-          <Card className="shadow-card border-border/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Camera className="h-4 w-4 sm:h-5 sm:w-5" />
-                Image Upload
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {!selectedImage ? (
-                <div
-                  className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-smooth ${dragActive
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50 hover:bg-primary/5'
-                    }`}
-                  onDrop={handleDrop}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDragEnter={() => setDragActive(true)}
-                  onDragLeave={() => setDragActive(false)}
-                >
-                  <Upload className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
-                  <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">
-                    Drop your plant image here
-                  </h3>
-                  <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">
-                    or click to browse your files
-                  </p>
-                  <Button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="gradient-primary text-white hover:opacity-90 min-h-[44px]"
-                  >
-                    Choose Image
-                  </Button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-3 sm:mt-4">
-                    Supports JPG, PNG, WEBP up to 10MB
-                  </p>
-                </div>
-              ) : (
-                <div className="relative">
-                  <img
-                    src={selectedImage}
-                    alt="Selected plant"
-                    className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-lg"
-                  />
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2 min-w-[44px] min-h-[44px]"
-                    onClick={clearImage}
-                    aria-label="Remove image"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        {/* Upload */}
+        <GlassCard delay={0.1}>
+          <h3 className="text-sm font-heading font-semibold text-white mb-4 flex items-center gap-2"><Camera className="h-4 w-4 text-neon-green" />Image Upload</h3>
+          {!selectedImage ? (
+            <div className={`border-2 border-dashed rounded-xl p-6 sm:p-8 text-center transition-all duration-200 ${dragActive ? "border-neon-green/40 bg-neon-green/[0.03]" : "border-white/[0.06] hover:border-neon-green/20 hover:bg-white/[0.01]"}`} onDrop={handleDrop} onDragOver={(e) => e.preventDefault()} onDragEnter={() => setDragActive(true)} onDragLeave={() => setDragActive(false)}>
+              <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}><Upload className="h-10 w-10 text-white/15 mx-auto mb-3" /></motion.div>
+              <p className="text-sm font-heading font-medium text-white/50 mb-1">Drop your plant image here</p>
+              <p className="text-xs text-white/20 mb-4">or click to browse</p>
+              <Button onClick={() => fileInputRef.current?.click()} className="btn-neon px-5 h-10">Choose Image</Button>
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+              <p className="text-[10px] text-white/15 mt-3">Supports JPG, PNG, WEBP up to 10MB</p>
+            </div>
+          ) : (
+            <div className="relative">
+              <div className="relative overflow-hidden rounded-xl border border-white/[0.06]">
+                <img src={selectedImage} alt="Selected plant" className="w-full h-48 sm:h-56 object-cover" />
+                {isAnalyzing && <motion.div className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-neon-green to-transparent" animate={{ top: ["0%", "100%", "0%"] }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }} />}
+              </div>
+              <Button variant="destructive" size="icon" className="absolute top-3 right-3 h-8 w-8 rounded-lg bg-red-500/70 backdrop-blur-sm" onClick={clearImage}><X className="h-3.5 w-3.5" /></Button>
+              {!result && !isAnalyzing && <Button onClick={analyzeImage} className="w-full btn-neon mt-4 min-h-[44px]" size="lg"><Camera className="mr-2 h-4 w-4" />Analyze Plant Health</Button>}
+              {isAnalyzing && <div className="mt-4 space-y-2"><div className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin text-neon-green" /><span className="text-xs text-white/40">Analyzing with <strong className="text-white/60">Gemini AI</strong>...</span></div><Progress value={65} className="h-1.5 progress-neon" /></div>}
+              {isSaving && <div className="mt-4 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin text-neon-green" /><span className="text-xs text-neon-green">Uploading and sending email...</span></div>}
+            </div>
+          )}
+        </GlassCard>
 
-                  {!result && !isAnalyzing && (
-                    <div className="mt-4">
-                      <Button
-                        onClick={analyzeImage}
-                        className="w-full gradient-primary text-white hover:opacity-90 min-h-[48px]"
-                        size="lg"
-                      >
-                        <Camera className="mr-2 h-5 w-5" />
-                        Analyze Plant Health
-                      </Button>
-                    </div>
-                  )}
-
-                  {isAnalyzing && (
-                    <div className="mt-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs sm:text-sm text-muted-foreground flex items-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Analyzing image with Gemini AI...
-                        </span>
-                      </div>
-                      <Progress value={65} className="h-2" />
-                      <p className="text-xs text-muted-foreground">
-                        Our AI is examining your plant leaf for signs of disease
-                      </p>
-                    </div>
-                  )}
-
-                  {isSaving && (
-                    <div className="mt-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs sm:text-sm text-primary flex items-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Uploading to Cloudinary & Sending Email...
-                        </span>
-                      </div>
-                      <Progress value={90} className="h-2" />
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Results Section */}
-          <Card className="shadow-card border-border/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-                Analysis Results
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {!result && !isAnalyzing && (
-                <div className="text-center py-8">
-                  <Info className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
-                  <p className="text-sm sm:text-base text-muted-foreground">
-                    Upload an image to see AI analysis results
-                  </p>
-                </div>
-              )}
-
-              {result && (
-                <div className="space-y-4 sm:space-y-6 animate-slide-up">
-                  {/* Disease Detection */}
-                  <div>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-                      <h3 className="text-base sm:text-lg font-semibold text-foreground">
-                        Diagnosis
-                      </h3>
-                      <Badge variant={result.confidence === "High" ? "default" : result.confidence === "Medium" ? "secondary" : "outline"}>
-                        {result.confidence} Confidence
-                      </Badge>
-                    </div>
-                    <div className="bg-secondary/30 rounded-lg p-3 sm:p-4">
-                      <h4 className="font-medium text-foreground mb-2 text-base sm:text-lg">{result.diseaseName}</h4>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-3">{formatText(result.description)}</p>
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle className={`h-4 w-4 ${result.severity === "Severe" ? "text-red-500" :
-                          result.severity === "Moderate" ? "text-yellow-500" :
-                            result.severity === "Mild" ? "text-orange-500" :
-                              "text-green-500"
-                          }`} />
-                        <span className="text-xs sm:text-sm font-medium">Severity: {result.severity}</span>
-                      </div>
-                    </div>
+        {/* Results */}
+        <GlassCard delay={0.15}>
+          <h3 className="text-sm font-heading font-semibold text-white mb-4 flex items-center gap-2"><CheckCircle className="h-4 w-4 text-neon-green" />Analysis Results</h3>
+          {!result && !isAnalyzing && (
+            <div className="text-center py-10"><motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity }}><Info className="h-10 w-10 text-white/10 mx-auto mb-3" /></motion.div><p className="text-xs text-white/25">Upload an image to see results</p></div>
+          )}
+          <AnimatePresence>
+            {result && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                {/* Diagnosis */}
+                <motion.div initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-heading font-semibold text-white/50">Diagnosis</p>
+                    <Badge className={`text-[10px] border ${result.confidence === "High" ? "bg-neon-green/10 text-neon-green border-neon-green/20" : result.confidence === "Medium" ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" : "bg-white/5 text-white/40 border-white/10"}`}>{result.confidence} Confidence</Badge>
                   </div>
-
-                  {/* Symptoms */}
-                  {result.symptoms && result.symptoms.length > 0 && (
-                    <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3">
-                        Observed Symptoms
-                      </h3>
-                      <ul className="space-y-2">
-                        {result.symptoms.map((symptom: string, index: number) => (
-                          <li key={index} className="flex items-start gap-2 sm:gap-3">
-                            <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-xs sm:text-sm text-foreground">{formatText(symptom)}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Causes */}
-                  {result.causes && result.causes.length > 0 && (
-                    <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3">
-                        Possible Causes
-                      </h3>
-                      <ul className="space-y-2">
-                        {result.causes.map((cause: string, index: number) => (
-                          <li key={index} className="flex items-start gap-2 sm:gap-3">
-                            <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-xs sm:text-sm text-foreground">{formatText(cause)}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Treatment */}
-                  {result.treatment && result.treatment.length > 0 && (
-                    <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3">
-                        Recommended Treatment
-                      </h3>
-                      <ul className="space-y-2">
-                        {result.treatment.map((step: string, index: number) => (
-                          <li key={index} className="flex items-start gap-2 sm:gap-3">
-                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium mt-0.5 flex-shrink-0">
-                              {index + 1}
-                            </div>
-                            <span className="text-xs sm:text-sm text-foreground">{formatText(step)}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Prevention */}
-                  {result.prevention && result.prevention.length > 0 && (
-                    <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3">
-                        Prevention Tips
-                      </h3>
-                      <ul className="space-y-2">
-                        {result.prevention.map((tip: string, index: number) => (
-                          <li key={index} className="flex items-start gap-2 sm:gap-3">
-                            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-xs sm:text-sm text-foreground">{formatText(tip)}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Additional Notes */}
-                  {result.additionalNotes && (
-                    <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
-                      <h3 className="text-xs sm:text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-                        <Info className="h-4 w-4 text-blue-500" />
-                        Additional Notes
-                      </h3>
-                      <p className="text-xs sm:text-sm text-muted-foreground">{formatText(result.additionalNotes)}</p>
-                    </div>
-                  )}
-
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button
-                      onClick={clearImage}
-                      variant="outline"
-                      className="flex-1 min-h-[44px]"
-                    >
-                      Analyze Another Plant
-                    </Button>
-                    {!showApiKeyInput && (
-                      <Button
-                        onClick={() => setShowApiKeyInput(true)}
-                        variant="ghost"
-                        size="sm"
-                      >
-                        Change API Key
-                      </Button>
-                    )}
+                  <div className="bg-white/[0.02] rounded-xl p-3 border border-white/[0.04]">
+                    <p className="text-base font-heading font-bold text-white mb-1">{result.diseaseName}</p>
+                    <p className="text-xs text-white/35 mb-2">{formatText(result.description)}</p>
+                    <div className="flex items-center gap-1.5"><AlertTriangle className={`h-3 w-3 ${sevColor(result.severity)}`} /><span className={`text-xs font-semibold ${sevColor(result.severity)}`}>Severity: {result.severity}</span></div>
                   </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </main>
+                </motion.div>
 
-      {/* Decorative Elements */}
-      <div className="relative py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
-        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
-        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
+                {/* Sections */}
+                {[
+                  { title: "Observed Symptoms", items: result.symptoms, icon: AlertTriangle, iconColor: "text-orange-400", delay: 0.2 },
+                  { title: "Possible Causes", items: result.causes, icon: Info, iconColor: "text-blue-400", delay: 0.3 },
+                ].map((sec) => sec.items?.length > 0 && (
+                  <motion.div key={sec.title} initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: sec.delay }}>
+                    <p className="text-xs font-heading font-semibold text-white/50 mb-2">{sec.title}</p>
+                    <ul className="space-y-1.5">{sec.items.map((item, i) => <li key={i} className="flex items-start gap-2"><sec.icon className={`h-3 w-3 ${sec.iconColor} mt-0.5 flex-shrink-0`} /><span className="text-xs text-white/40">{formatText(item)}</span></li>)}</ul>
+                  </motion.div>
+                ))}
+
+                {result.treatment?.length > 0 && (
+                  <motion.div initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
+                    <p className="text-xs font-heading font-semibold text-white/50 mb-2">Treatment</p>
+                    <ul className="space-y-1.5">{result.treatment.map((s, i) => <li key={i} className="flex items-start gap-2"><div className="w-4.5 h-4.5 bg-neon-green/10 text-neon-green rounded-full flex items-center justify-center text-[9px] font-bold mt-0.5 flex-shrink-0 border border-neon-green/20">{i + 1}</div><span className="text-xs text-white/40">{formatText(s)}</span></li>)}</ul>
+                  </motion.div>
+                )}
+
+                {result.prevention?.length > 0 && (
+                  <motion.div initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
+                    <p className="text-xs font-heading font-semibold text-white/50 mb-2">Prevention</p>
+                    <ul className="space-y-1.5">{result.prevention.map((t, i) => <li key={i} className="flex items-start gap-2"><CheckCircle className="h-3 w-3 text-neon-green mt-0.5 flex-shrink-0" /><span className="text-xs text-white/40">{formatText(t)}</span></li>)}</ul>
+                  </motion.div>
+                )}
+
+                {result.additionalNotes && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="bg-blue-500/[0.04] border border-blue-500/10 rounded-xl p-3">
+                    <p className="text-[11px] font-heading font-semibold text-white/50 mb-1 flex items-center gap-1"><Info className="h-3 w-3 text-blue-400" />Additional Notes</p>
+                    <p className="text-xs text-white/35">{formatText(result.additionalNotes)}</p>
+                  </motion.div>
+                )}
+
+                <div className="flex gap-2 pt-1">
+                  <Button onClick={clearImage} className="flex-1 btn-glass h-9 text-xs">Analyze Another</Button>
+                  {!showApiKeyInput && <Button onClick={() => setShowApiKeyInput(true)} variant="ghost" size="sm" className="text-white/15 hover:text-white/40 text-[10px]">Change Key</Button>}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </GlassCard>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

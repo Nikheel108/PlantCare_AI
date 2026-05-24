@@ -42,3 +42,12 @@ const sensorSchema = new mongoose.Schema({
 });
 
 export const SensorData = mongoose.model('SensorData', sensorSchema);
+
+const deviceCommandSchema = new mongoose.Schema({
+  deviceId: { type: String, required: true, index: true },
+  pumpCommand: { type: String, enum: ['on', 'off', null], default: null },
+  mistCommand: { type: String, enum: ['on', 'off', null], default: null },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+export const DeviceCommand = mongoose.model('DeviceCommand', deviceCommandSchema);

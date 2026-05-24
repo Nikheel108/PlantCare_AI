@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
-import { Droplets, Power, Settings, TrendingUp, AlertTriangle, CheckCircle, Leaf, Sprout } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Droplets, Power, Settings, TrendingUp, AlertTriangle, CheckCircle, Thermometer } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Navbar } from "@/components/layout/Navbar";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
+import { MiniSparkline } from "@/components/ui/MiniSparkline";
 import { useEsp } from "@/contexts/EspContext";
 
 export default function AutoWatering() {
@@ -15,50 +18,35 @@ export default function AutoWatering() {
   const [isMistActive, setIsMistActive] = useState(false);
   const [pumpDuration, setPumpDuration] = useState(0);
   const [lastWatering, setLastWatering] = useState("2 hours ago");
+  const [humidity, setHumidity] = useState(58);
 
-  const { data, togglePump, toggleMist } = useEsp();
+  const { data, togglePump, toggleMist, online } = useEsp();
 
-  // Sync incoming ESP data into UI states
   useEffect(() => {
-    if (typeof data.pumpActive === 'number') setIsPumpActive(data.pumpActive === 1);
-    if (typeof data.soilPercent === 'number') {
+    if (typeof data.pumpActive === "number") {
+      const isActive = data.pumpActive === 1;
+      setIsPumpActive((prev) => {
+        if (!prev && isActive) setPumpDuration(5);
+        if (!isActive) setPumpDuration(0);
+        return isActive;
+      });
+    }
+    if (typeof data.soilPercent === "number") {
       setSoilMoisture(Math.max(0, Math.min(100, Math.round(data.soilPercent))));
-    } else if (typeof data.soilDry === 'number') {
+    } else if (typeof data.soilDry === "number") {
       setSoilMoisture(data.soilDry === 1 ? 25 : 70);
     }
-    if (typeof data.mistActive === 'number') setIsMistActive(data.mistActive === 1);
+    if (typeof data.mistActive === "number") setIsMistActive(data.mistActive === 1);
   }, [data]);
 
-  // Simulate real-time moisture data
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSoilMoisture(prev => {
-        const newValue = Math.max(20, Math.min(100, prev + (Math.random() - 0.5) * 3));
+  // Removed random readings simulation
 
-        // Auto-watering logic
-        if (isAutoMode && newValue < 35 && !isPumpActive) {
-          setIsPumpActive(true);
-          setPumpDuration(10);
-          setLastWatering("Just now");
-        }
-
-        return newValue;
-      });
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [isAutoMode, isPumpActive]);
-
-  // Pump timer
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isPumpActive && pumpDuration > 0) {
       timer = setInterval(() => {
-        setPumpDuration(prev => {
-          if (prev <= 1) {
-            setIsPumpActive(false);
-            return 0;
-          }
+        setPumpDuration((prev) => {
+          if (prev <= 1) { setIsPumpActive(false); return 0; }
           return prev - 1;
         });
       }, 1000);
@@ -68,274 +56,215 @@ export default function AutoWatering() {
 
   const handleManualWatering = () => {
     if (!isPumpActive) {
-      // request ESP to turn pump on
-      togglePump(true).then(success => {
-        if (success) {
-          setIsPumpActive(true);
-          setPumpDuration(15);
-          setLastWatering("Just now");
-        }
+      togglePump(true).then((ok) => {
+        if (ok) { setIsPumpActive(true); setPumpDuration(15); setLastWatering("Just now"); }
       });
     }
   };
 
   const stopPump = () => {
-    togglePump(false).then(success => {
-      if (success) {
-        setIsPumpActive(false);
-        setPumpDuration(0);
-      }
+    togglePump(false).then((ok) => {
+      if (ok) { setIsPumpActive(false); setPumpDuration(0); }
     });
   };
 
   const getMoistureStatus = () => {
-    if (soilMoisture < 30) return { status: "Low", color: "text-red-600", bg: "bg-red-50 dark:bg-red-900/20" };
-    if (soilMoisture < 60) return { status: "Moderate", color: "text-yellow-600", bg: "bg-yellow-50 dark:bg-yellow-900/20" };
-    return { status: "Good", color: "text-green-600", bg: "bg-green-50 dark:bg-green-900/20" };
+    if (soilMoisture < 30) return { status: "Low", badge: "bg-red-500/10 text-red-400 border-red-500/20" };
+    if (soilMoisture < 60) return { status: "Moderate", badge: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" };
+    return { status: "Good", badge: "bg-neon-green/10 text-neon-green border-neon-green/20" };
   };
 
-  const moistureStatus = getMoistureStatus();
+  const ms = getMoistureStatus();
+  const displayTemp = typeof data?.temperature === "number" ? data.temperature : 24.5;
 
   return (
-    <div className="min-h-screen bg-gradient-bg">
-      <Navbar />
-
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="mb-6 sm:mb-8 animate-fade-in">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
-            Auto-Watering System
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Monitor soil moisture and control irrigation automatically
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Soil Moisture Card */}
-          <Card className="shadow-card border-border/50 hover-lift">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Droplets className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-600" />
-                Soil Moisture
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center mb-4">
-                <div className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
-                  {soilMoisture.toFixed(0)}%
-                </div>
-                <Badge className={`${moistureStatus.bg} ${moistureStatus.color} border-0 text-xs sm:text-sm`}>
-                  {moistureStatus.status}
-                </Badge>
-              </div>
-
-              <Progress value={soilMoisture} className="h-2 sm:h-3 mb-4" />
-
-              <div className="space-y-2 text-xs sm:text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Optimal Range:</span>
-                  <span className="font-medium">40-80%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Last Reading:</span>
-                  <span className="font-medium">Now</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Control Panel */}
-          <Card className="shadow-card border-border/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
-                Control Panel
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 sm:space-y-6">
-              {/* Auto Mode Toggle */}
-              <div className="flex items-start sm:items-center justify-between gap-3">
-                <div className="flex-1">
-                  <h3 className="font-medium text-sm sm:text-base text-foreground">Auto Mode</h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    Automatic watering when soil is dry
-                  </p>
-                </div>
-                <Switch
-                  checked={isAutoMode}
-                  onCheckedChange={setIsAutoMode}
-                  className="flex-shrink-0"
-                />
-              </div>
-
-              {/* Manual Controls */}
-              <div className="space-y-3">
-                <h3 className="font-medium text-sm sm:text-base text-foreground">Manual Control</h3>
-                <Button
-                  onClick={handleManualWatering}
-                  disabled={isPumpActive || isAutoMode}
-                  className="w-full gradient-primary text-white hover:opacity-90 disabled:opacity-50 min-h-[48px]"
-                  size="lg"
-                >
-                  <Droplets className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                  Start Watering
-                </Button>
-
-                <Button
-                  onClick={() => {
-                    // toggle mist
-                    toggleMist(!isMistActive).then(success => {
-                      if (success) setIsMistActive(prev => !prev);
-                    });
-                  }}
-                  variant={isMistActive ? undefined : "outline"}
-                  className="w-full mt-2 min-h-[48px]"
-                  size="lg"
-                >
-                  <Droplets className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                  {isMistActive ? 'Stop Mist' : 'Start Mist'}
-                </Button>
-
-                {isPumpActive && (
-                  <Button
-                    onClick={stopPump}
-                    variant="destructive"
-                    className="w-full min-h-[48px]"
-                    size="lg"
-                  >
-                    <Power className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                    Stop Pump
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Pump Status */}
-          <Card className="shadow-card border-border/50 md:col-span-2 lg:col-span-1">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Power className="h-5 w-5" />
-                Pump Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center mb-4">
-                <div className={`w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center ${isPumpActive
-                    ? 'bg-green-100 text-green-600 pulse-glow dark:bg-green-900/20'
-                    : 'bg-gray-100 text-gray-400 dark:bg-gray-800'
-                  }`}>
-                  <Power className="h-8 w-8" />
-                </div>
-                <div className="text-lg font-semibold text-foreground">
-                  {isPumpActive ? 'Active' : 'Inactive'}
-                </div>
-                {isPumpActive && (
-                  <div className="text-sm text-muted-foreground">
-                    {pumpDuration} seconds remaining
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Mode:</span>
-                  <Badge variant={isAutoMode ? "default" : "secondary"}>
-                    {isAutoMode ? 'Auto' : 'Manual'}
-                  </Badge>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Last Watering:</span>
-                  <span className="text-sm font-medium">{lastWatering}</span>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Daily Usage:</span>
-                  <span className="text-sm font-medium">2.3L</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Simple Chart Alternative */}
-        <Card className="mt-6 shadow-card border-border/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Moisture History (Last 24 Hours)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Simple bar visualization */}
-              <div className="grid grid-cols-12 gap-2 h-32 items-end">
-                {Array.from({ length: 12 }, (_, i) => {
-                  const height = Math.random() * 60 + 20;
-                  return (
-                    <div key={i} className="flex flex-col items-center">
-                      <div
-                        className="w-full bg-primary/20 rounded-t"
-                        style={{ height: `${height}%` }}
-                      ></div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {i * 2}h
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>0%</span>
-                <span>50%</span>
-                <span>100%</span>
-              </div>
+    <DashboardLayout particles="water">
+      <div className="relative h-full min-h-[70vh]">
+        {!online && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-md rounded-2xl bg-black/40 border border-white/5">
+            <div className="text-center p-8 bg-black/60 border border-white/10 rounded-3xl max-w-sm backdrop-blur-xl shadow-2xl">
+              <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-white mb-3">ESP is Offline</h2>
+              <p className="text-white/60 text-sm">Please connect or power on your ESP device to view and control the auto-watering system.</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        )}
+        <div className={`transition-all duration-300 ${!online ? "opacity-30 blur-md pointer-events-none" : ""}`}>
+      {/* Header */}
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-white mb-1">
+          Auto-Watering <span className="text-neon">System</span>
+        </h1>
+        <p className="text-sm text-white/35">
+          Monitor soil moisture and control <strong className="text-white/55">irrigation automatically</strong>
+        </p>
+      </motion.div>
 
-        {/* Alert Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <Card className="shadow-card border-border/50 bg-yellow-50/50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-foreground mb-1">Low Moisture Alert</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Soil moisture has dropped below 35%. Auto-watering will activate soon.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Top stat row with sparklines */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <GlassCard delay={0.1}>
+          <div className="flex items-start justify-between mb-3">
+            <div className="w-9 h-9 rounded-xl bg-cyan-500/[0.08] border border-cyan-500/20 flex items-center justify-center">
+              <Droplets className="h-4 w-4 text-cyan-400" />
+            </div>
+            <MiniSparkline color="#22d3ee" />
+          </div>
+          <p className="text-xs text-white/30 mb-1">Soil Moisture</p>
+          <div className="flex items-end gap-2 mb-3">
+            <span className="text-3xl font-heading font-bold text-white">{soilMoisture.toFixed(0)}%</span>
+            <Badge className={`${ms.badge} border text-[10px] mb-1`}>{ms.status}</Badge>
+          </div>
+          <Progress value={soilMoisture} className="h-1.5 progress-neon" />
+          <p className="text-[10px] text-white/15 mt-2">Optimal range: 40-80%</p>
+        </GlassCard>
 
-          <Card className="shadow-card border-border/50 bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-3">
-                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-foreground mb-1">System Status</h3>
-                  <p className="text-sm text-muted-foreground">
-                    All sensors are working properly. Last maintenance: 3 days ago.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
+        <GlassCard delay={0.15}>
+          <div className="flex items-start justify-between mb-3">
+            <div className="w-9 h-9 rounded-xl bg-orange-500/[0.08] border border-orange-500/20 flex items-center justify-center">
+              <Thermometer className="h-4 w-4 text-orange-400" />
+            </div>
+            <MiniSparkline color="#fb923c" />
+          </div>
+          <p className="text-xs text-white/30 mb-1">Temperature</p>
+          <div className="flex items-end gap-1">
+            <span className="text-3xl font-heading font-bold text-white">
+              <AnimatedCounter target={displayTemp} decimals={1} />
+            </span>
+            <span className="text-lg text-white/30 mb-0.5">C</span>
+          </div>
+        </GlassCard>
 
-      {/* Decorative Elements */}
-      <div className="relative py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
-        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
-        <Leaf className="h-6 w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
-        <Sprout className="h-6 w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
+        <GlassCard delay={0.2}>
+          <div className="flex items-start justify-between mb-3">
+            <div className="w-9 h-9 rounded-xl bg-blue-500/[0.08] border border-blue-500/20 flex items-center justify-center">
+              <Droplets className="h-4 w-4 text-blue-400" />
+            </div>
+            <MiniSparkline color="#60a5fa" />
+          </div>
+          <p className="text-xs text-white/30 mb-1">Humidity</p>
+          <span className="text-3xl font-heading font-bold text-white">{humidity.toFixed(0)}%</span>
+        </GlassCard>
       </div>
-    </div>
+
+      {/* Control + Pump + Chart row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        {/* Control Panel */}
+        <GlassCard delay={0.25}>
+          <div className="flex items-center gap-2 mb-5">
+            <Settings className="h-4 w-4 text-white/30" />
+            <h3 className="text-sm font-heading font-semibold text-white">Control Panel</h3>
+          </div>
+          <div className="space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white/70">Auto Mode</p>
+                <p className="text-[11px] text-white/25">Waters when soil is dry</p>
+              </div>
+              <Switch checked={isAutoMode} onCheckedChange={setIsAutoMode} />
+            </div>
+            <div className="space-y-2.5">
+              <Button onClick={handleManualWatering} disabled={isPumpActive || isAutoMode} className="w-full btn-neon min-h-[44px] disabled:opacity-30" size="lg">
+                <Droplets className="mr-2 h-4 w-4" /> Start Watering
+              </Button>
+              <Button onClick={() => { toggleMist(!isMistActive).then((ok) => { if (ok) setIsMistActive((p) => !p); }); }} className={`w-full min-h-[44px] ${isMistActive ? "btn-neon" : "btn-glass"}`} size="lg">
+                <Droplets className="mr-2 h-4 w-4" /> {isMistActive ? "Stop Mist" : "Start Mist"}
+              </Button>
+              {isPumpActive && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>
+                  <Button onClick={stopPump} variant="destructive" className="w-full min-h-[44px]" size="lg">
+                    <Power className="mr-2 h-4 w-4" /> Stop Pump
+                  </Button>
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </GlassCard>
+
+        {/* Pump Status */}
+        <GlassCard delay={0.3} glow={isPumpActive}>
+          <div className="flex items-center gap-2 mb-5">
+            <Power className="h-4 w-4 text-white/30" />
+            <h3 className="text-sm font-heading font-semibold text-white">Pump Status</h3>
+          </div>
+          <div className="text-center mb-5">
+            <motion.div
+              animate={isPumpActive ? { scale: [1, 1.05, 1] } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className={`w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center border-2 transition-all duration-500 ${
+                isPumpActive
+                  ? "bg-neon-green/[0.06] border-neon-green/30 shadow-[0_0_30px_rgba(0,230,118,0.2)]"
+                  : "bg-white/[0.02] border-white/[0.06]"
+              }`}
+            >
+              <Power className={`h-8 w-8 ${isPumpActive ? "text-neon-green" : "text-white/15"}`} />
+            </motion.div>
+            <p className="text-base font-heading font-semibold text-white">{isPumpActive ? "Active" : "Inactive"}</p>
+            {isPumpActive && <p className="text-xs text-neon-green mt-1">{pumpDuration}s remaining</p>}
+          </div>
+          <div className="space-y-2.5">
+            {[
+              { l: "Mode", v: isAutoMode ? "Auto" : "Manual" },
+              { l: "Last Watering", v: lastWatering },
+              { l: "Daily Usage", v: "2.3L" },
+            ].map((r) => (
+              <div key={r.l} className="flex justify-between text-xs border-b border-white/[0.03] pb-2 last:border-0">
+                <span className="text-white/25">{r.l}</span>
+                <span className="text-white/55 font-medium">{r.v}</span>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+
+        {/* Chart */}
+        <GlassCard delay={0.35} className="md:col-span-2 lg:col-span-1">
+          <div className="flex items-center gap-2 mb-5">
+            <TrendingUp className="h-4 w-4 text-white/30" />
+            <h3 className="text-sm font-heading font-semibold text-white">Moisture History</h3>
+          </div>
+          <div className="grid grid-cols-12 gap-1 h-28 items-end mb-2">
+            {Array.from({ length: 12 }, (_, i) => {
+              const h = Math.random() * 60 + 20;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ height: 0 }}
+                  animate={{ height: `${h}%` }}
+                  transition={{ duration: 0.4, delay: i * 0.04 }}
+                  className="w-full rounded-t-sm"
+                  style={{ background: `linear-gradient(to top, rgba(0,230,118,0.1), rgba(0,230,118,${0.25 + h / 250}))` }}
+                />
+              );
+            })}
+          </div>
+          <div className="flex justify-between text-[9px] text-white/15">
+            {Array.from({ length: 7 }, (_, i) => <span key={i}>{i * 4}h</span>)}
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* Alerts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <GlassCard delay={0.4} hover={false} className="border-yellow-500/[0.06]">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-heading font-semibold text-white mb-1">Low Moisture Alert</p>
+              <p className="text-xs text-white/30">Soil moisture dropped below 35%. Auto-watering will activate soon.</p>
+            </div>
+          </div>
+        </GlassCard>
+        <GlassCard delay={0.45} hover={false} className="border-neon-green/[0.06]">
+          <div className="flex items-start gap-3">
+            <CheckCircle className="h-4 w-4 text-neon-green mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-heading font-semibold text-white mb-1">System Status</p>
+              <p className="text-xs text-white/30">All sensors working properly. Last maintenance: 3 days ago.</p>
+            </div>
+          </div>
+        </GlassCard>
+      </div>
+        </div>
+      </div>
+    </DashboardLayout>
   );
 }

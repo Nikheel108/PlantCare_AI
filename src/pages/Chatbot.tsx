@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Leaf, Sprout } from "lucide-react";
+import { Send, Bot, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Navbar } from "@/components/layout/Navbar";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { GlassCard } from "@/components/ui/GlassCard";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { motion } from "framer-motion";
+
 
 interface Message {
   id: string;
@@ -182,81 +185,42 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-bg">
-      <Navbar />
-
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="mb-6 sm:mb-8 animate-fade-in">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
-            Plant Care Assistant
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Get expert advice on plant care, diseases, and maintenance powered by Google Gemini
-          </p>
-        </div>
+    <DashboardLayout>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-white mb-1">
+          Plant <span className="text-neon">Assistant</span>
+        </h1>
+        <p className="text-sm text-white/35">
+          Get expert advice powered by <strong className="text-white/55">Google Gemini AI</strong>
+        </p>
+      </motion.div>
 
         {/* API Key Input */}
         {showApiKeyInput && (
-          <Card className="mb-4 border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20">
-            <CardContent className="pt-4 sm:pt-6">
-              <div className="space-y-3">
-                <div className="flex flex-col gap-2">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-sm sm:text-base mb-1">Gemini API Key Required</h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground mb-3">
-                      Get your free API key from{" "}
-                      <a
-                        href="https://makersuite.google.com/app/apikey"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        Google AI Studio
-                      </a>
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <Input
-                        type="password"
-                        placeholder="Enter your Gemini API key"
-                        value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                        className="flex-1 h-11 sm:h-12 text-base"
-                      />
-                      <Button
-                        onClick={() => {
-                          if (apiKey.trim()) {
-                            setShowApiKeyInput(false);
-                          }
-                        }}
-                        disabled={!apiKey.trim()}
-                        className="min-h-[44px] sm:min-h-[48px] w-full sm:w-auto"
-                      >
-                        Save
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <GlassCard hover={false} className="mb-4 border-yellow-500/10">
+            <p className="text-sm font-heading font-semibold text-white mb-2">Gemini API Key Required</p>
+            <p className="text-xs text-white/30 mb-3">Get a free key from <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-neon-green hover:underline">Google AI Studio</a></p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Input type="password" placeholder="Enter API key" value={apiKey} onChange={(e) => setApiKey(e.target.value)} className="flex-1 h-10 bg-white/[0.04] border-white/[0.06] text-white placeholder:text-white/20" />
+              <Button onClick={() => { if (apiKey.trim()) setShowApiKeyInput(false); }} disabled={!apiKey.trim()} className="btn-neon h-10">Save</Button>
+            </div>
+          </GlassCard>
         )}
 
-        <Card className="shadow-card border-border/50 flex flex-col" style={{ height: 'calc(100vh - 250px)', minHeight: '500px', maxHeight: '700px' }}>
-          <CardHeader className="border-b border-border pb-3 sm:pb-4">
-            <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-base sm:text-lg">
-              <div className="flex items-center gap-2">
-                <Bot className="h-5 w-5 text-primary" />
-                PlantCareAI Assistant
-              </div>
-              <div className="flex items-center gap-2 sm:ml-auto">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-xs sm:text-sm text-muted-foreground">Online</span>
-              </div>
-            </CardTitle>
-          </CardHeader>
+        <div className="glass rounded-2xl border border-white/[0.04] flex flex-col" style={{ height: 'calc(100vh - 250px)', minHeight: '500px', maxHeight: '700px' }}>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
+            <div className="flex items-center gap-2">
+              <Bot className="h-4 w-4 text-neon-green" />
+              <span className="text-sm font-heading font-semibold text-white">PlantCare Assistant</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-neon-green shadow-[0_0_6px_rgba(0,230,118,0.6)]" />
+              <span className="text-[10px] text-white/25">Online</span>
+            </div>
+          </div>
 
           {/* Messages Area */}
-          <CardContent className="flex-1 overflow-y-auto p-0">
+          <div className="flex-1 overflow-y-auto">
             <div className="p-3 sm:p-4 space-y-3 sm:space-y-4 max-h-full">
               {messages.map((message) => (
                 <div
@@ -265,7 +229,7 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
                     }`}
                 >
                   <Avatar className="w-8 h-8 flex-shrink-0">
-                    <AvatarFallback className={message.sender === 'bot' ? 'bg-primary text-primary-foreground' : 'bg-secondary'}>
+                    <AvatarFallback className={message.sender === 'bot' ? 'bg-neon-green/20 text-neon-green' : 'bg-white/10 text-white/60'}>
                       {message.sender === 'bot' ? (
                         <Bot className="h-4 w-4" />
                       ) : (
@@ -276,20 +240,20 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
 
                   <div className={`max-w-[85%] sm:max-w-[80%] ${message.sender === 'user' ? 'text-right' : ''}`}>
                     <div
-                      className={`rounded-lg px-3 sm:px-4 py-2 ${message.sender === 'user'
-                        ? 'bg-primary text-primary-foreground ml-auto'
-                        : 'bg-secondary text-foreground'
+                      className={`rounded-xl px-3 sm:px-4 py-2.5 ${message.sender === 'user'
+                        ? 'bg-neon-green/15 text-white ml-auto border border-neon-green/10'
+                        : 'bg-white/[0.03] text-white/70 border border-white/[0.04]'
                         }`}
                     >
                       {message.sender === 'bot' ? (
-                        <div className="text-xs sm:text-sm whitespace-pre-wrap space-y-2">
+                        <div className="text-xs sm:text-sm whitespace-pre-wrap space-y-2 text-white/60">
                           {formatText(message.text)}
                         </div>
                       ) : (
                         <p className="text-xs sm:text-sm">{message.text}</p>
                       )}
                     </div>
-                    <span className="text-xs text-muted-foreground mt-1 block">
+                    <span className="text-[10px] text-white/15 mt-1 block">
                       {formatTime(message.timestamp)}
                     </span>
                   </div>
@@ -299,15 +263,15 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
               {isTyping && (
                 <div className="flex items-start gap-2 sm:gap-3 animate-pulse">
                   <Avatar className="w-8 h-8">
-                    <AvatarFallback className="bg-primary text-primary-foreground">
+                    <AvatarFallback className="bg-neon-green/20 text-neon-green">
                       <Bot className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
-                  <div className="bg-secondary rounded-lg px-3 sm:px-4 py-2">
+                  <div className="bg-white/[0.03] rounded-xl px-3 sm:px-4 py-2.5 border border-white/[0.04]">
                     <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-1.5 h-1.5 bg-neon-green/50 rounded-full animate-bounce"></div>
+                      <div className="w-1.5 h-1.5 bg-neon-green/50 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-1.5 h-1.5 bg-neon-green/50 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
                   </div>
                 </div>
@@ -315,73 +279,36 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
 
               <div ref={messagesEndRef} />
             </div>
-          </CardContent>
+          </div>
 
           {/* Quick Questions */}
           {messages.length === 1 && (
-            <div className="px-3 sm:px-4 py-2 border-t border-border bg-secondary/20">
-              <p className="text-xs sm:text-sm text-muted-foreground mb-2">Quick questions:</p>
-              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+            <div className="px-3 sm:px-4 py-2 border-t border-white/[0.03] bg-white/[0.01]">
+              <p className="text-[10px] text-white/20 mb-2">Quick questions:</p>
+              <div className="flex flex-wrap gap-1.5">
                 {quickQuestions.map((question, index) => (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    size="sm"
-                    className="text-xs min-h-[36px]"
-                    onClick={() => setInputMessage(question)}
-                  >
+                  <button key={index} onClick={() => setInputMessage(question)} className="text-[11px] px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white/35 hover:text-neon-green hover:border-neon-green/20 transition-colors">
                     {question}
-                  </Button>
+                  </button>
                 ))}
               </div>
             </div>
           )}
 
           {/* Input Area */}
-          <div className="p-3 sm:p-4 border-t border-border">
+          <div className="p-3 sm:p-4 border-t border-white/[0.04]">
             <div className="flex gap-2">
-              <Input
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask me about plant care..."
-                className="flex-1 h-11 sm:h-12 text-base"
-                disabled={isTyping}
-              />
-              <Button
-                onClick={handleSendMessage}
-                disabled={!inputMessage.trim() || isTyping}
-                className="gradient-primary text-white hover:opacity-90 min-w-[44px] min-h-[44px] sm:min-w-[48px] sm:min-h-[48px]"
-                aria-label="Send message"
-              >
-                <Send className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Input value={inputMessage} onChange={(e) => setInputMessage(e.target.value)} onKeyPress={handleKeyPress} placeholder="Ask me about plant care..." className="flex-1 h-10 bg-white/[0.04] border-white/[0.06] text-white placeholder:text-white/20" disabled={isTyping} />
+              <Button onClick={handleSendMessage} disabled={!inputMessage.trim() || isTyping} className="btn-neon min-w-[44px] min-h-[40px]" aria-label="Send message">
+                <Send className="h-4 w-4" />
               </Button>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-2">
-              <p className="text-xs text-muted-foreground">
-                Powered by Intelligent Plant Care AI
-              </p>
-              {!showApiKeyInput && (
-                <button
-                  onClick={() => setShowApiKeyInput(true)}
-                  className="text-xs text-primary hover:underline text-left sm:text-right min-h-[36px] flex items-center"
-                >
-                  Change API Key
-                </button>
-              )}
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-[10px] text-white/15">Powered by PlantCare AI</p>
+              {!showApiKeyInput && <button onClick={() => setShowApiKeyInput(true)} className="text-[10px] text-white/15 hover:text-neon-green">Change Key</button>}
             </div>
           </div>
-        </Card>
-      </main>
-
-      {/* Decorative Elements */}
-      <div className="relative py-6 sm:py-8 flex justify-center gap-2 opacity-30 pointer-events-none">
-        <Sprout className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 animate-pulse" style={{ animationDelay: '0s' }} />
-        <Leaf className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
-        <Sprout className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
-        <Leaf className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
-        <Sprout className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 animate-pulse" style={{ animationDelay: '0.8s' }} />
-      </div>
-    </div>
+        </div>
+    </DashboardLayout>
   );
 }
