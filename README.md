@@ -26,7 +26,19 @@ A web application for managing plant care with features like automated watering,
 git clone [repository-url]
 ```
 
-2. Install dependencies:
+2. Install dependencies (recommended: `pnpm`)
+
+Preferred (pnpm - recommended for CI/builds like Vercel):
+```bash
+# enable Corepack (if not already)
+corepack enable
+corepack prepare pnpm@8.10.0 --activate
+# clean local artifacts, install and generate lockfile
+rm -rf node_modules package-lock.json
+pnpm install
+```
+
+Alternative (npm):
 ```bash
 npm install
 ```
@@ -42,6 +54,8 @@ npm install
 
 4. Start the development server:
 ```bash
+pnpm run dev    # if using pnpm
+# or
 npm run dev
 ```
 
