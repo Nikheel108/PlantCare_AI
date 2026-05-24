@@ -1,102 +1,85 @@
 // ============================================================
-// PlantCare AI — PURE AUTOMATIC MODE (Bulletproof Logic)
+// PlantCare AI — ESP32 DEVKIT V1 FIRMWARE
 // ============================================================
-// This code is strictly based on your parameters. 
-// It guarantees the pump WILL stop the exact second the soil
-// registers as wet. No manual overrides, no web server blocking.
-// ============================================================
-
-#include <ESP8266WiFi.h>
-#include <DHT.h>
+#include <WiFi.h>
 #include <WiFiClientSecure.h>
+#include <DHT.h>
 
-// ─── Pin Definitions ────────────────────────────────────────
+// ─── Pin Definitions (ESP32) ────────────────────────────────
 // Sensors
-#define DHTPIN        5       // D1 — DHT11 data pin
-#define SOIL_PIN      4       // D2 — Soil moisture (digital: HIGH = dry)
-#define MQ135_PIN     A0      // A0 — MQ-135 analog output
+#define DHTPIN        4       // GPIO4
+#define SOIL_PIN      5       // GPIO5
+#define MQ135_PIN     34      // GPIO34 (ADC1 - Must use ADC1 with Wi-Fi)
 
-// Relays (Active HIGH)
-#define RELAY_PUMP    12      // D6 — Water pump relay
-#define RELAY_MIST    14      // D5 — Mist sprayer relay
+// Relays
+#define RELAY_PUMP    12      // GPIO12
+#define RELAY_MIST    14      // GPIO14
 
 // LEDs
-#define LED_GREEN     16      // D0 — Green LED (online)
-#define LED_YELLOW    0       // D3 — Yellow LED (AQI warning)
-#define LED_BLUE      2       // D4 — Blue LED (mist active)
-#define LED_RED       13      // D7 — Red LED (pump active)
+#define LED_GREEN     18      // GPIO18
+#define LED_YELLOW    19      // GPIO19
+#define LED_BLUE      21      // GPIO21
+#define LED_RED       22      // GPIO22
 
 #define DHTTYPE       DHT11
 
-// ─── Wi-Fi Credentials ─────────────────────────────────────
+// ─── Wi-Fi & Server ─────────────────────────────────────────
 const char* ssid = "APEX";
 const char* pass = "apex@403";
 
-// ─── Render Server Config ───────────────────────────────────
 const char* SERVER_HOST = "plantcare-ai-mms1.onrender.com";
 const uint16_t SERVER_PORT = 443;
 const char* SERVER_PATH  = "/api/sensors";
 const char* API_KEY      = "HR8PLSCgN/FtzbNTNUo+rJyq0zr5xKKZE/fK7DhzoTE=";
 const char* DEVICE_ID    = "esp-balcony-1";
 
-// ─── Timing & Thresholds ────────────────────────────────────
-const unsigned long SENSOR_INTERVAL   = 2000UL;   // Read sensors every 2 seconds
-const unsigned long PUSH_INTERVAL     = 5000UL;   // Push data every 5 seconds
-const unsigned long PUMP_MAX_DURATION = 10000UL;  // Pump maximum run time (10 seconds)
-const unsigned long MIST_MAX_DURATION = 10000UL;  // Mist maximum run time (10 seconds)
+// ─── Timing ─────────────────────────────────────────────────
+const unsigned long SENSOR_INTERVAL = 2000UL;
+const unsigned long PUSH_INTERVAL   = 5000UL;
 
-const int AQI_BAD_THRESHOLD = 400; // Above this -> mist ON
-const int AQI_OK_THRESHOLD  = 300; // Below this -> mist OFF
+const unsigned long RUN_TIME      = 5000UL;  // Start motor for 5 seconds
+const unsigned long COOLDOWN_TIME = 3000UL;  // Stop motor for 3 seconds
 
-// ─── Global State ───────────────────────────────────────────
+// ESP32 ADC is 12-bit (0-4095), so thresholds are scaled up from ESP8266 (0-1023)
+const int AQI_BAD_THRESHOLD = 1600;
+const int AQI_OK_THRESHOLD  = 1200;
+
+// ─── State ──────────────────────────────────────────────────
 DHT dht(DHTPIN, DHTTYPE);
 WiFiClientSecure secureClient;
 
 unsigned long lastPush       = 0;
 unsigned long lastSensorRead = 0;
-unsigned long pumpStartTime  = 0;
-unsigned long mistStartTime  = 0;
-
-bool pumpActive = false;
-bool mistActive = false;
 
 float lastTemp     = 0.0;
 float lastHumidity = 0.0;
 int   lastAqi      = 0;
-bool  soilIsDry    = false; // TRUE = needs water, FALSE = wet enough
+bool  soilIsDry    = false; 
 
-// ─── Helpers: Turn Relays ON/OFF ────────────────────────────
+enum State { IDLE, RUNNING, COOLDOWN };
+
+State pumpState = IDLE;
+unsigned long pumpStateTime = 0;
+
+State mistState = IDLE;
+unsigned long mistStateTime = 0;
+
+// ─── Relays ─────────────────────────────────────────────────
 void setPump(bool turnOn) {
-  if (pumpActive == turnOn) return; // Do nothing if already in correct state
-  
-  pumpActive = turnOn;
   digitalWrite(RELAY_PUMP, turnOn ? HIGH : LOW);
   digitalWrite(LED_RED, turnOn ? HIGH : LOW);
-  
-  if (turnOn) {
-    pumpStartTime = millis();
-    Serial.println("\n[PUMP] 🟢 TURNED ON (Watering...)");
-  } else {
-    Serial.println("\n[PUMP] 🔴 TURNED OFF (Stopped!)");
-  }
+  if (turnOn) Serial.println("\n[PUMP] 🟢 ON (Watering for 5s)");
+  else Serial.println("\n[PUMP] 🔴 OFF (Paused or Finished)");
 }
 
 void setMist(bool turnOn) {
-  if (mistActive == turnOn) return;
-  
-  mistActive = turnOn;
   digitalWrite(RELAY_MIST, turnOn ? HIGH : LOW);
-  digitalWrite(LED_BLUE, turnOn ? LOW : HIGH); // Blue LED is inverted
-  
-  if (turnOn) {
-    mistStartTime = millis();
-    Serial.println("\n[MIST] 🟢 TURNED ON");
-  } else {
-    Serial.println("\n[MIST] 🔴 TURNED OFF");
-  }
+  digitalWrite(LED_BLUE, turnOn ? HIGH : LOW); 
+  if (turnOn) Serial.println("\n[MIST] 🟢 ON (Misting for 5s)");
+  else Serial.println("\n[MIST] 🔴 OFF (Paused or Finished)");
 }
 
-// ─── Sensor Reading ─────────────────────────────────────────
+// ─── Sensors ────────────────────────────────────────────────
 void readSensors() {
   float t = dht.readTemperature();
   float h = dht.readHumidity();
@@ -105,102 +88,98 @@ void readSensors() {
 
   lastAqi = analogRead(MQ135_PIN);
   
-  // LM393 Soil Sensor Logic:
-  // digitalRead == HIGH means the soil is DRY (needs water)
-  // digitalRead == LOW means the soil is WET (stop watering)
+  // High = Dry, Low = Wet
   soilIsDry = (digitalRead(SOIL_PIN) == HIGH);
   
   Serial.print("[SENSOR] Soil Status: ");
-  Serial.println(soilIsDry ? "DRY (Needs Water)" : "WET (Watering not needed)");
+  Serial.println(soilIsDry ? "DRY" : "WET");
 }
 
-// ─── BULLETPROOF AUTO LOGIC ─────────────────────────────────
+// ─── Auto Logic ─────────────────────────────────────────────
 void autoControl() {
   unsigned long now = millis();
 
   // --- PUMP LOGIC ---
-  if (pumpActive) {
-    // 1. If soil registers as WET, STOP IMMEDIATELY.
-    if (!soilIsDry) {
-      Serial.println("[LOGIC] Soil reached wet status!");
-      setPump(false);
-    } 
-    // 2. Or, if 10 seconds has passed, stop to let water soak.
-    else if (now - pumpStartTime >= PUMP_MAX_DURATION) {
-      Serial.println("[LOGIC] 10s maximum reached. Stopping to let water soak.");
-      setPump(false);
-    }
-  } else {
-    // Pump is currently OFF. If soil is DRY, start watering!
+  if (pumpState == IDLE) {
     if (soilIsDry) {
+      pumpState = RUNNING;
+      pumpStateTime = now;
       setPump(true);
+    }
+  } 
+  else if (pumpState == RUNNING) {
+    if (!soilIsDry) {
+      pumpState = IDLE;
+      setPump(false);
+      Serial.println("[LOGIC] Soil is wet! Stopping pump.");
+    }
+    else if (now - pumpStateTime >= RUN_TIME) {
+      pumpState = COOLDOWN;
+      pumpStateTime = now;
+      setPump(false);
+      Serial.println("[LOGIC] 5s finished. Cooling down for 3s.");
+    }
+  } 
+  else if (pumpState == COOLDOWN) {
+    if (now - pumpStateTime >= COOLDOWN_TIME) {
+      pumpState = IDLE; 
     }
   }
 
   // --- MIST LOGIC ---
-  if (mistActive) {
-    if (lastAqi < AQI_OK_THRESHOLD) {
-      setMist(false);
-    } else if (now - mistStartTime >= MIST_MAX_DURATION) {
+  bool aqiIsBad = (lastAqi > AQI_BAD_THRESHOLD);
+
+  if (mistState == IDLE) {
+    if (aqiIsBad) {
+      mistState = RUNNING;
+      mistStateTime = now;
+      setMist(true);
+    }
+  } 
+  else if (mistState == RUNNING) {
+    if (!aqiIsBad) {
+      mistState = IDLE;
       setMist(false);
     }
-  } else {
-    if (lastAqi > AQI_BAD_THRESHOLD) {
-      setMist(true);
+    else if (now - mistStateTime >= RUN_TIME) {
+      mistState = COOLDOWN;
+      mistStateTime = now;
+      setMist(false);
+    }
+  } 
+  else if (mistState == COOLDOWN) {
+    if (now - mistStateTime >= COOLDOWN_TIME) {
+      mistState = IDLE; 
     }
   }
 
-  // Yellow LED matches AQI status
-  digitalWrite(LED_YELLOW, (lastAqi > AQI_BAD_THRESHOLD) ? LOW : HIGH);
+  digitalWrite(LED_YELLOW, aqiIsBad ? HIGH : LOW); 
 }
 
-// ─── Cloud Data Push ────────────────────────────────────────
+// ─── Cloud ──────────────────────────────────────────────────
 void pushToServer() {
   if (!WiFi.isConnected()) return;
-
-  // Convert binary dry/wet to a percentage for your dashboard
   int fakePercentage = soilIsDry ? 20 : 76;
+  bool pActive = (pumpState == RUNNING);
+  bool mActive = (mistState == RUNNING);
 
-  String payload = "{";
-  payload += "\"userId\":\"" + String(DEVICE_ID) + "\",";
-  payload += "\"moisture\":" + String(fakePercentage) + ",";
-  payload += "\"isPumpActive\":" + String(pumpActive ? "true" : "false") + ",";
-  payload += "\"mistActive\":" + String(mistActive ? "true" : "false") + ",";
-  payload += "\"pumpDuration\":0,"; // Removed manual duration
-  payload += "\"trigger\":\"esp_auto\",";
-  payload += "\"plantZone\":\"balcony\",";
-  payload += "\"status\":\"ok\",";
-  payload += "\"temperature\":" + String(lastTemp, 1) + ",";
-  payload += "\"aqi\":" + String(lastAqi);
-  payload += "}";
+  String payload = "{\"userId\":\"" + String(DEVICE_ID) + "\",\"moisture\":" + String(fakePercentage) + ",\"isPumpActive\":" + String(pActive ? "true" : "false") + ",\"mistActive\":" + String(mActive ? "true" : "false") + ",\"pumpDuration\":0,\"trigger\":\"esp_auto\",\"plantZone\":\"balcony\",\"status\":\"ok\",\"temperature\":" + String(lastTemp, 1) + ",\"aqi\":" + String(lastAqi) + "}";
 
   secureClient.setInsecure();
   if (secureClient.connect(SERVER_HOST, SERVER_PORT)) {
-    String req = String("POST ") + SERVER_PATH + " HTTP/1.1\r\n" +
-                 "Host: " + SERVER_HOST + "\r\n" +
-                 "Content-Type: application/json\r\n" +
-                 "Content-Length: " + String(payload.length()) + "\r\n" +
-                 "x-api-key: " + API_KEY + "\r\n" +
-                 "Connection: close\r\n\r\n" +
-                 payload;
-
+    String req = String("POST ") + SERVER_PATH + " HTTP/1.1\r\nHost: " + SERVER_HOST + "\r\nContent-Type: application/json\r\nContent-Length: " + String(payload.length()) + "\r\nx-api-key: " + API_KEY + "\r\nConnection: close\r\n\r\n" + payload;
     secureClient.print(req);
-    // Discard response to prevent memory crashes
     unsigned long timeout = millis() + 1000;
     while (secureClient.connected() && millis() < timeout) {
-      while (secureClient.available()) {
-        secureClient.read();
-      }
+      while (secureClient.available()) secureClient.read();
     }
     secureClient.stop();
-    Serial.println("[CLOUD] Sent data successfully");
   }
 }
 
 // ─── SETUP ──────────────────────────────────────────────────
 void setup() {
   Serial.begin(115200);
-  Serial.println("\n\n[SYSTEM] Booting...");
 
   pinMode(SOIL_PIN, INPUT);
   pinMode(RELAY_PUMP, OUTPUT);
@@ -210,45 +189,32 @@ void setup() {
   pinMode(LED_BLUE, OUTPUT);
   pinMode(LED_RED, OUTPUT);
 
-  // Everything OFF
   digitalWrite(RELAY_PUMP, LOW);
   digitalWrite(RELAY_MIST, LOW);
   digitalWrite(LED_GREEN, LOW);
-  digitalWrite(LED_YELLOW, HIGH);
-  digitalWrite(LED_BLUE, HIGH);
+  digitalWrite(LED_YELLOW, LOW);
+  digitalWrite(LED_BLUE, LOW);
   digitalWrite(LED_RED, LOW);
 
   dht.begin();
-  delay(2000); // Warmup
   readSensors();
 
   WiFi.begin(ssid, pass);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(300);
-    Serial.print(".");
-  }
+  while (WiFi.status() != WL_CONNECTED) delay(300);
   digitalWrite(LED_GREEN, HIGH);
-  Serial.println("\n[SYSTEM] Online & Ready");
 }
 
-// ─── MAIN LOOP ──────────────────────────────────────────────
+// ─── LOOP ───────────────────────────────────────────────────
 void loop() {
   unsigned long now = millis();
-
-  // 1. Read sensors every 2 seconds
   if (now - lastSensorRead >= SENSOR_INTERVAL) {
     lastSensorRead = now;
     readSensors();
   }
-
-  // 2. Check and enforce rules instantly
   autoControl();
-
-  // 3. Send data to cloud every 5 seconds
   if (now - lastPush >= PUSH_INTERVAL) {
     lastPush = now;
     pushToServer();
   }
-
-  delay(50); // Small delay to prevent ESP overheating
+  delay(50); 
 }

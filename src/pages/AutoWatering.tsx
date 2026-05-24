@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Droplets, Power, Settings, TrendingUp, AlertTriangle, CheckCircle, Thermometer } from "lucide-react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +19,7 @@ export default function AutoWatering() {
   const [lastWatering, setLastWatering] = useState("2 hours ago");
   const [humidity, setHumidity] = useState(58);
 
-  const { data, togglePump, toggleMist, online } = useEsp();
+  const { data, online } = useEsp();
 
   useEffect(() => {
     if (typeof data.pumpActive === "number") {
@@ -54,19 +53,7 @@ export default function AutoWatering() {
     return () => clearInterval(timer);
   }, [isPumpActive, pumpDuration]);
 
-  const handleManualWatering = () => {
-    if (!isPumpActive) {
-      togglePump(true).then((ok) => {
-        if (ok) { setIsPumpActive(true); setPumpDuration(15); setLastWatering("Just now"); }
-      });
-    }
-  };
 
-  const stopPump = () => {
-    togglePump(false).then((ok) => {
-      if (ok) { setIsPumpActive(false); setPumpDuration(0); }
-    });
-  };
 
   const getMoistureStatus = () => {
     if (soilMoisture < 30) return { status: "Low", badge: "bg-red-500/10 text-red-400 border-red-500/20" };
@@ -152,30 +139,20 @@ export default function AutoWatering() {
         <GlassCard delay={0.25}>
           <div className="flex items-center gap-2 mb-5">
             <Settings className="h-4 w-4 text-white/30" />
-            <h3 className="text-sm font-heading font-semibold text-white">Control Panel</h3>
+            <h3 className="text-sm font-heading font-semibold text-white">System Operation</h3>
           </div>
           <div className="space-y-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white/70">Auto Mode</p>
-                <p className="text-[11px] text-white/25">Waters when soil is dry</p>
+                <p className="text-sm font-medium text-white/70">Strict Auto Mode</p>
+                <p className="text-[11px] text-white/25">Hardware controlled via ESP32</p>
               </div>
-              <Switch checked={isAutoMode} onCheckedChange={setIsAutoMode} />
+              <Switch checked={true} disabled={true} />
             </div>
-            <div className="space-y-2.5">
-              <Button onClick={handleManualWatering} disabled={isPumpActive || isAutoMode} className="w-full btn-neon min-h-[44px] disabled:opacity-30" size="lg">
-                <Droplets className="mr-2 h-4 w-4" /> Start Watering
-              </Button>
-              <Button onClick={() => { toggleMist(!isMistActive).then((ok) => { if (ok) setIsMistActive((p) => !p); }); }} className={`w-full min-h-[44px] ${isMistActive ? "btn-neon" : "btn-glass"}`} size="lg">
-                <Droplets className="mr-2 h-4 w-4" /> {isMistActive ? "Stop Mist" : "Start Mist"}
-              </Button>
-              {isPumpActive && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>
-                  <Button onClick={stopPump} variant="destructive" className="w-full min-h-[44px]" size="lg">
-                    <Power className="mr-2 h-4 w-4" /> Stop Pump
-                  </Button>
-                </motion.div>
-              )}
+            <div className="bg-white/[0.03] border border-white/[0.05] rounded-xl p-4">
+               <p className="text-xs text-white/50 leading-relaxed">
+                 Manual overrides have been securely disabled. The ESP32 is running a strict <span className="text-white/80 font-medium">5s ON / 3s OFF</span> state-machine loop to perfectly optimize soil soaking and prevent overwatering.
+               </p>
             </div>
           </div>
         </GlassCard>
