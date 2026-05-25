@@ -10,59 +10,59 @@
 @layer base {
   :root {
     /* ── Core Palette ── */
-    --neon-green: 145 100% 45%;        /* #00e676 */
-    --primary-green: 122 39% 49%;      /* #4caf50 */
-    --secondary-green: 145 63% 49%;    /* #2de882 */
-    --light-green: 145 100% 70%;       /* #69f0ae */
-    --dark-green: 140 60% 12%;         /* #0d2e14 */
-    --deep-green: 140 80% 8%;          /* #062e0e */
+    --neon-green: 145 100% 35%;        /* Darker neon green for light mode contrast */
+    --primary-green: 122 39% 40%;      
+    --secondary-green: 145 63% 40%;    
+    --light-green: 145 100% 45%;       
+    --dark-green: 140 60% 12%;         
+    --deep-green: 140 80% 8%;          
 
-    /* Surfaces */
-    --surface-0: 0 0% 4%;              /* #0a0a0a */
-    --surface-1: 0 0% 7%;              /* #121212 */
-    --surface-2: 0 0% 10%;             /* #1a1a1a */
-    --surface-3: 0 0% 14%;             /* #242424 */
+    /* Surfaces (Light) */
+    --surface-0: 0 0% 98%;             /* #fafafa */
+    --surface-1: 0 0% 100%;            /* #ffffff */
+    --surface-2: 0 0% 95%;             /* #f2f2f2 */
+    --surface-3: 0 0% 90%;             /* #e5e5e5 */
 
-    /* Text */
-    --text-primary: 0 0% 100%;         /* #ffffff */
-    --text-secondary: 0 0% 70%;        /* #b3b3b3 */
-    --text-muted: 0 0% 45%;            /* #737373 */
+    /* Text (Light) */
+    --text-primary: 0 0% 9%;           /* #171717 */
+    --text-secondary: 0 0% 40%;        /* #666666 */
+    --text-muted: 0 0% 50%;            /* #808080 */
 
     /* Design tokens */
     --radius: 14px;
     --font-heading: 'Space Grotesk', sans-serif;
     --font-body: 'Inter', sans-serif;
 
-    /* Glass effect tokens */
-    --glass-bg: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(0, 230, 118, 0.12);
+    /* Glass effect tokens (Light) */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.08);
     --glass-hover-border: rgba(0, 230, 118, 0.3);
-    --glass-glow: 0 0 30px rgba(0, 230, 118, 0.08);
-    --glass-hover-glow: 0 0 40px rgba(0, 230, 118, 0.15);
+    --glass-glow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    --glass-hover-glow: 0 8px 30px rgba(0, 230, 118, 0.15);
 
-    /* Gradients */
+    /* Gradients (Light) */
     --gradient-primary: linear-gradient(135deg, hsl(var(--neon-green)), hsl(var(--primary-green)));
     --gradient-surface: linear-gradient(180deg, hsl(var(--surface-0)), hsl(var(--surface-1)));
-    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-    --gradient-glow: radial-gradient(circle at 50% 0%, rgba(0,230,118,0.08), transparent 60%);
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
+    --gradient-glow: radial-gradient(circle at 50% 0%, rgba(0,230,118,0.1), transparent 60%);
 
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     --transition-spring: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
-    /* ── shadcn/ui Variable Mapping ── */
+    /* ── shadcn/ui Variable Mapping (Light) ── */
     --background: var(--surface-0);
     --foreground: var(--text-primary);
 
     --card: var(--surface-1);
     --card-foreground: var(--text-primary);
 
-    --popover: var(--surface-2);
+    --popover: var(--surface-1);
     --popover-foreground: var(--text-primary);
 
     --primary: var(--neon-green);
-    --primary-foreground: 0 0% 4%;
+    --primary-foreground: 0 0% 98%;
 
     --secondary: var(--surface-2);
     --secondary-foreground: var(--text-primary);
@@ -70,28 +70,58 @@
     --muted: var(--surface-2);
     --muted-foreground: var(--text-muted);
 
-    --accent: var(--dark-green);
+    --accent: var(--surface-2);
     --accent-foreground: var(--text-primary);
 
-    --destructive: 0 75% 55%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 16%;
-    --input: 0 0% 14%;
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
     --ring: var(--neon-green);
 
     --sidebar-background: var(--surface-1);
     --sidebar-foreground: var(--text-secondary);
     --sidebar-primary: var(--neon-green);
-    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: var(--surface-2);
     --sidebar-accent-foreground: var(--text-primary);
-    --sidebar-border: 0 0% 16%;
+    --sidebar-border: 0 0% 88%;
     --sidebar-ring: var(--neon-green);
   }
 
-  /* Keep .dark class but make it the same — dark mode only */
   .dark {
+    /* ── Core Palette (Dark) ── */
+    --neon-green: 145 100% 45%;        /* #00e676 */
+    --primary-green: 122 39% 49%;      /* #4caf50 */
+    --secondary-green: 145 63% 49%;    /* #2de882 */
+    --light-green: 145 100% 70%;       /* #69f0ae */
+    --dark-green: 140 60% 12%;         /* #0d2e14 */
+    --deep-green: 140 80% 8%;          /* #062e0e */
+
+    /* Surfaces (Dark) */
+    --surface-0: 0 0% 4%;              /* #0a0a0a */
+    --surface-1: 0 0% 7%;              /* #121212 */
+    --surface-2: 0 0% 10%;             /* #1a1a1a */
+    --surface-3: 0 0% 14%;             /* #242424 */
+
+    /* Text (Dark) */
+    --text-primary: 0 0% 100%;         /* #ffffff */
+    --text-secondary: 0 0% 70%;        /* #b3b3b3 */
+    --text-muted: 0 0% 45%;            /* #737373 */
+
+    /* Glass effect tokens (Dark) */
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(0, 230, 118, 0.12);
+    --glass-hover-border: rgba(0, 230, 118, 0.3);
+    --glass-glow: 0 0 30px rgba(0, 230, 118, 0.08);
+    --glass-hover-glow: 0 0 40px rgba(0, 230, 118, 0.15);
+
+    /* Gradients (Dark) */
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    --gradient-glow: radial-gradient(circle at 50% 0%, rgba(0,230,118,0.08), transparent 60%);
+
+    /* ── shadcn/ui Variable Mapping (Dark) ── */
     --background: var(--surface-0);
     --foreground: var(--text-primary);
     --card: var(--surface-1);

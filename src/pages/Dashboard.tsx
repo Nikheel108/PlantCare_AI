@@ -63,20 +63,20 @@ export default function Dashboard() {
         className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8"
       >
         <div>
-          <p className="text-sm text-white/30 mb-1">Welcome back,</p>
-          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-white">
+          <p className="text-sm text-muted-foreground dark:text-white/30 mb-1">Welcome back,</p>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground dark:text-white">
             Hey, <span className="text-neon">{firstName}</span>
           </h1>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-xs text-white/30">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-background dark:bg-white/[0.03] border border-border dark:border-white/[0.06] text-xs text-muted-foreground dark:text-white/30">
             <span className={`w-1.5 h-1.5 rounded-full ${online ? "bg-neon-green" : "bg-red-500"}`} />
             {online ? "System Online" : "System Offline"}
           </div>
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 text-white/25 hover:text-white/60 hover:bg-white/[0.04] rounded-xl"
+            className="h-9 w-9 text-muted-foreground dark:text-white/25 hover:text-foreground dark:hover:text-white/60 hover:bg-accent dark:hover:bg-white/[0.04] rounded-xl"
           >
             <Bell className="h-4 w-4" />
           </Button>
@@ -99,9 +99,9 @@ export default function Dashboard() {
               </div>
               <MiniSparkline color="#22d3ee" />
             </div>
-            <p className="text-xs text-white/30 mb-1">Soil Moisture</p>
+            <p className="text-xs text-muted-foreground dark:text-white/30 mb-1">Soil Moisture</p>
             <div className="flex items-end gap-2">
-              <span className="text-3xl font-heading font-bold text-white">{soilMoisture.toFixed(0)}%</span>
+              <span className="text-3xl font-heading font-bold text-foreground dark:text-white">{soilMoisture.toFixed(0)}%</span>
               <Badge className="bg-neon-green/10 text-neon-green border-neon-green/20 text-[10px] mb-1">
                 <TrendingUp className="h-2.5 w-2.5 mr-0.5" /> 4.2%
               </Badge>
@@ -119,14 +119,14 @@ export default function Dashboard() {
               </div>
               <MiniSparkline color="#fb923c" />
             </div>
-            <p className="text-xs text-white/30 mb-1">Temperature</p>
+            <p className="text-xs text-muted-foreground dark:text-white/30 mb-1">Temperature</p>
             <div className="flex items-end gap-2">
-              <span className="text-3xl font-heading font-bold text-white">
+              <span className="text-3xl font-heading font-bold text-foreground dark:text-white">
                 <AnimatedCounter target={displayTemp} decimals={1} suffix="" />
               </span>
-              <span className="text-lg text-white/40 mb-0.5">C</span>
+              <span className="text-lg text-muted-foreground dark:text-white/40 mb-0.5">C</span>
             </div>
-            <p className="text-[11px] text-white/20 mt-2">Optimal for growth</p>
+            <p className="text-[11px] text-muted-foreground dark:text-white/20 mt-2">Optimal for growth</p>
           </GlassCard>
         </motion.div>
 
@@ -139,14 +139,14 @@ export default function Dashboard() {
               </div>
               <MiniSparkline color="#60a5fa" />
             </div>
-            <p className="text-xs text-white/30 mb-1">Humidity</p>
+            <p className="text-xs text-muted-foreground dark:text-white/30 mb-1">Humidity</p>
             <div className="flex items-end gap-2">
-              <span className="text-3xl font-heading font-bold text-white">{humidity.toFixed(0)}%</span>
+              <span className="text-3xl font-heading font-bold text-foreground dark:text-white">{humidity.toFixed(0)}%</span>
               <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20 text-[10px] mb-1">
                 <TrendingDown className="h-2.5 w-2.5 mr-0.5" /> 1.8%
               </Badge>
             </div>
-            <p className="text-[11px] text-white/20 mt-2">Ideal for most plants</p>
+            <p className="text-[11px] text-muted-foreground dark:text-white/20 mt-2">Ideal for most plants</p>
           </GlassCard>
         </motion.div>
 
@@ -159,14 +159,14 @@ export default function Dashboard() {
               </div>
               <MiniSparkline color="#00e676" />
             </div>
-            <p className="text-xs text-white/30 mb-1">Air Quality</p>
+            <p className="text-xs text-muted-foreground dark:text-white/30 mb-1">Air Quality</p>
             <div className="flex items-end gap-2">
-              <span className="text-3xl font-heading font-bold text-white">
+              <span className="text-3xl font-heading font-bold text-foreground dark:text-white">
                 {displayAQI !== null ? displayAQI : "42"}
               </span>
-              <span className="text-xs text-white/25 mb-1">AQI</span>
+              <span className="text-xs text-muted-foreground dark:text-white/25 mb-1">AQI</span>
             </div>
-            <p className="text-[11px] text-white/20 mt-2">
+            <p className="text-[11px] text-muted-foreground dark:text-white/20 mt-2">
               {displayAQI !== null ? "Live sensor" : "Simulated"}
             </p>
           </GlassCard>
@@ -179,7 +179,7 @@ export default function Dashboard() {
         <div className="lg:col-span-2">
           <GlassCard delay={0.3} hover={false}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-sm font-heading font-semibold text-white">Quick Actions</h2>
+              <h2 className="text-sm font-heading font-semibold text-foreground dark:text-white">Quick Actions</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
@@ -190,7 +190,7 @@ export default function Dashboard() {
                 <button
                   key={action.title}
                   onClick={() => navigate(action.href)}
-                  className="group flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.08] hover:bg-white/[0.04] transition-all duration-200 text-left"
+                  className="group flex items-center gap-3 p-3.5 rounded-xl bg-background dark:bg-white/[0.02] border border-border dark:border-white/[0.04] hover:border-border dark:hover:border-white/[0.08] hover:bg-accent dark:hover:bg-white/[0.04] transition-all duration-200 text-left"
                 >
                   <div
                     className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
@@ -199,10 +199,10 @@ export default function Dashboard() {
                     <action.icon className="h-4.5 w-4.5" style={{ color: action.color }} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-white/70 group-hover:text-white transition-colors">{action.title}</p>
-                    <p className="text-[11px] text-white/25">{action.desc}</p>
+                    <p className="text-sm font-medium text-muted-foreground dark:text-white/70 group-hover:text-foreground dark:group-hover:text-white transition-colors">{action.title}</p>
+                    <p className="text-[11px] text-muted-foreground dark:text-white/25">{action.desc}</p>
                   </div>
-                  <ArrowRight className="h-3.5 w-3.5 text-white/10 group-hover:text-white/30 ml-auto flex-shrink-0 transition-all duration-200 group-hover:translate-x-0.5" />
+                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground dark:text-white/10 group-hover:text-foreground dark:group-hover:text-white/30 ml-auto flex-shrink-0 transition-all duration-200 group-hover:translate-x-0.5" />
                 </button>
               ))}
             </div>
@@ -211,7 +211,7 @@ export default function Dashboard() {
 
         {/* Sensor & LED Status */}
         <GlassCard delay={0.35} hover={false}>
-          <h2 className="text-sm font-heading font-semibold text-white mb-4">Sensor Status</h2>
+          <h2 className="text-sm font-heading font-semibold text-foreground dark:text-white mb-4">Sensor Status</h2>
           <div className="space-y-3">
             {[
               { label: "System", active: online, color: "bg-neon-green" },
@@ -219,16 +219,16 @@ export default function Dashboard() {
               { label: "Mist System", active: data.mistActive === 1, color: "bg-blue-500" },
               { label: "AQI Alert", active: typeof data.aqi === "number" && data.aqi > 400, color: "bg-red-500" },
             ].map((sensor) => (
-              <div key={sensor.label} className="flex items-center justify-between py-2 border-b border-white/[0.03] last:border-0">
+              <div key={sensor.label} className="flex items-center justify-between py-2 border-b border-border dark:border-white/[0.03] last:border-0">
                 <div className="flex items-center gap-2.5">
                   <span
                     className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
-                      sensor.active ? `${sensor.color} shadow-[0_0_6px_currentColor]` : "bg-white/10"
+                      sensor.active ? `${sensor.color} shadow-[0_0_6px_currentColor]` : "bg-muted-foreground dark:bg-white/10"
                     }`}
                   />
-                  <span className="text-xs text-white/40">{sensor.label}</span>
+                  <span className="text-xs text-muted-foreground dark:text-white/40">{sensor.label}</span>
                 </div>
-                <span className={`text-[10px] font-medium ${sensor.active ? "text-white/60" : "text-white/15"}`}>
+                <span className={`text-[10px] font-medium ${sensor.active ? "text-foreground dark:text-white/60" : "text-muted-foreground dark:text-white/15"}`}>
                   {sensor.active ? "Active" : "Idle"}
                 </span>
               </div>
@@ -240,19 +240,19 @@ export default function Dashboard() {
       {/* Activity Table */}
       <GlassCard delay={0.4} hover={false}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-heading font-semibold text-white">Recent Activity</h2>
+          <h2 className="text-sm font-heading font-semibold text-foreground dark:text-white">Recent Activity</h2>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate("/history")}
-            className="text-xs text-white/25 hover:text-neon-green h-7 px-2"
+            className="text-xs text-muted-foreground dark:text-white/25 hover:text-neon-green h-7 px-2"
           >
             View All
           </Button>
         </div>
 
         {/* Table header */}
-        <div className="hidden sm:grid grid-cols-4 gap-4 px-3 py-2 text-[10px] font-semibold text-white/20 uppercase tracking-wider border-b border-white/[0.04]">
+        <div className="hidden sm:grid grid-cols-4 gap-4 px-3 py-2 text-[10px] font-semibold text-muted-foreground dark:text-white/20 uppercase tracking-wider border-b border-border dark:border-white/[0.04]">
           <span>Action</span>
           <span>Plant</span>
           <span>Time</span>
@@ -260,18 +260,18 @@ export default function Dashboard() {
         </div>
 
         {/* Table rows */}
-        <div className="divide-y divide-white/[0.03]">
+        <div className="divide-y divide-border dark:divide-white/[0.03]">
           {recentActivities.map((activity, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 + i * 0.06 }}
-              className="grid grid-cols-1 sm:grid-cols-4 gap-1 sm:gap-4 px-3 py-3 hover:bg-white/[0.02] transition-colors rounded-lg"
+              className="grid grid-cols-1 sm:grid-cols-4 gap-1 sm:gap-4 px-3 py-3 hover:bg-accent dark:hover:bg-white/[0.02] transition-colors rounded-lg"
             >
-              <span className="text-sm text-white/60 font-medium">{activity.action}</span>
-              <span className="text-xs text-white/30">{activity.plant}</span>
-              <span className="text-xs text-white/20">{activity.time}</span>
+              <span className="text-sm text-foreground dark:text-white/60 font-medium">{activity.action}</span>
+              <span className="text-xs text-muted-foreground dark:text-white/30">{activity.plant}</span>
+              <span className="text-xs text-muted-foreground dark:text-white/20">{activity.time}</span>
               <div className="sm:text-right">
                 <Badge
                   className={`text-[10px] border ${

@@ -7,6 +7,8 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import plantLogo from "@/assets/plant-logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -27,7 +29,7 @@ const Background = () => {
   }, [mouseX, mouseY]);
 
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-zinc-950">
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-background">
       {/* Aurora Blobs */}
       <motion.div
         animate={{
@@ -137,7 +139,7 @@ const SparkleTextReveal = ({ text }: { text: string }) => {
   return (
     <motion.span variants={container} initial="hidden" animate="visible" className="inline-block">
       {text.split("").map((char, index) => (
-        <motion.span key={index} variants={child} className="inline-block text-white">
+        <motion.span key={index} variants={child} className="inline-block text-foreground dark:text-white">
           {char === " " ? "\u00A0" : char}
         </motion.span>
       ))}
@@ -146,119 +148,30 @@ const SparkleTextReveal = ({ text }: { text: string }) => {
 };
 
 /* ═══════════════════════════════════════════
-   4. HYPER-INTERACTIVE "BENTO" TILT CARD
+   4. SLEEK FEATURE BUTTON
    ═══════════════════════════════════════════ */
-const BentoCard = ({ icon: Icon, title, desc, delay, onClick }: any) => {
-  const ref = useRef<HTMLDivElement>(null);
-  
-  // Physics values for tilt and glare
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const springConfig = { stiffness: 300, damping: 30, mass: 0.5 };
-  
-  // Map mouse position to rotation (max 15 degrees)
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], ["15deg", "-15deg"]), springConfig);
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], ["-15deg", "15deg"]), springConfig);
-  
-  // Glare position
-  const glareX = useSpring(useTransform(x, [-0.5, 0.5], ["100%", "0%"]), springConfig);
-  const glareY = useSpring(useTransform(y, [-0.5, 0.5], ["100%", "0%"]), springConfig);
-  const glareOpacity = useSpring(useTransform(y, [-0.5, 0.5], [0, 0.2]), springConfig);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    
-    x.set(mouseX / width - 0.5);
-    y.set(mouseY / height - 0.5);
-  };
-
-  const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
-  };
-
+const SleekFeatureButton = ({ icon: Icon, title, desc, delay, onClick }: any) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 50, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay, type: "spring", stiffness: 200, damping: 20 }}
-      ref={ref}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+    <motion.button
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.5, ease: "easeOut" }}
       onClick={onClick}
-      style={{
-        rotateX,
-        rotateY,
-        transformStyle: "preserve-3d",
-      }}
-      className="relative w-full h-[340px] group cursor-pointer perspective-1000"
+      className="group flex flex-col text-left w-full p-6 rounded-3xl bg-accent/30 dark:bg-zinc-900/40 backdrop-blur-md border border-border dark:border-white/10 hover:bg-accent/50 dark:hover:bg-zinc-800/60 transition-all duration-300 shadow-sm hover:shadow-md"
     >
-      {/* Outer wrapper for Meteor Glow Border */}
-      <div className="absolute inset-0 rounded-3xl bg-zinc-900/50 overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
-        
-        {/* Spinning Meteor Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250%] h-[250%] bg-[conic-gradient(transparent,transparent_30%,#00ff88_45%,#00f0ff_55%,transparent_70%)] animate-[spin_3s_linear_infinite] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        
-        {/* Evervault / Dark Glass Card (1px inset to reveal border) */}
-        <div 
-          className="absolute inset-[1px] rounded-3xl bg-zinc-950/90 backdrop-blur-xl flex flex-col p-8 transition-colors duration-300 group-hover:bg-zinc-950/70 overflow-hidden"
-          style={{ transform: "translateZ(40px)", transformStyle: "preserve-3d" }}
-        >
-          {/* Static subtle border when not hovered */}
-          <div className="absolute inset-0 rounded-3xl border border-white/10 group-hover:border-transparent transition-colors duration-300 pointer-events-none" />
-
-          {/* 3D Dynamic Glare overlay */}
-          <motion.div 
-            className="absolute inset-0 pointer-events-none rounded-3xl"
-            style={{
-              background: "radial-gradient(circle at center, white, transparent)",
-              opacity: glareOpacity,
-              left: glareX,
-              top: glareY,
-              transform: "translate(-50%, -50%) scale(2)",
-              mixBlendMode: "overlay"
-            }}
-          />
-
-          {/* Content Shift: Icon pops up and drops shadow */}
-          <div 
-            className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center mb-6 transition-all duration-500 ease-out group-hover:-translate-y-[10px] group-hover:shadow-[0_15px_30px_rgba(0,255,136,0.3)] group-hover:border-[#00ff88]/40 group-hover:bg-[#00ff88]/10"
-            style={{ transform: "translateZ(60px)" }}
-          >
-            <Icon className="h-7 w-7 text-white/70 group-hover:text-[#00ff88] transition-colors duration-500" />
-          </div>
-          
-          <h3 
-            className="text-2xl font-heading font-bold text-white mb-3"
-            style={{ transform: "translateZ(30px)" }}
-          >
-            {title}
-          </h3>
-          <p 
-            className="text-[15px] text-white/50 leading-relaxed font-medium mb-8 flex-1"
-            style={{ transform: "translateZ(20px)" }}
-          >
-            {desc}
-          </p>
-
-          {/* Content Shift: Launch text turns into glowing pill */}
-          <div 
-            className="mt-auto flex items-center transition-all duration-500 ease-out"
-            style={{ transform: "translateZ(40px)" }}
-          >
-            <div className="inline-flex items-center gap-2 text-sm font-bold text-white/50 group-hover:text-[#00ff88] group-hover:bg-[#00ff88]/10 group-hover:px-5 group-hover:py-2.5 group-hover:rounded-full group-hover:border group-hover:border-[#00ff88]/30 group-hover:shadow-[0_0_15px_rgba(0,255,136,0.2)] transition-all duration-500">
-              Launch 
-              <ArrowRight className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-1" />
-            </div>
-          </div>
+      <div className="flex items-center justify-between w-full mb-4">
+        <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-background/50 border border-border dark:border-white/5">
+          <Icon className="h-5 w-5 text-muted-foreground group-hover:text-foreground dark:text-white/60 dark:group-hover:text-white transition-colors" />
         </div>
+        <ArrowRight className="h-5 w-5 text-muted-foreground/30 group-hover:text-foreground dark:group-hover:text-white/80 group-hover:translate-x-1 transition-all duration-300" />
       </div>
-    </motion.div>
+      <h3 className="text-xl font-heading font-bold text-foreground dark:text-white mb-2">
+        {title}
+      </h3>
+      <p className="text-sm text-muted-foreground dark:text-white/60 leading-relaxed flex-1">
+        {desc}
+      </p>
+    </motion.button>
   );
 };
 
@@ -298,7 +211,7 @@ const Index = () => {
   }, [currentUser, navigate]);
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white relative font-sans selection:bg-[#00ff88]/30 selection:text-white hide-scrollbar">
+    <div className="min-h-screen bg-background text-foreground relative font-sans selection:bg-[#00ff88]/30 selection:text-foreground hide-scrollbar">
       <Background />
 
       {/* ═══ MAGNETIC NAVIGATION ═══ */}
@@ -313,14 +226,15 @@ const Index = () => {
             <div className="absolute inset-0 bg-[#00ff88] blur-2xl opacity-40 rounded-full" />
             <img src={plantLogo} alt="Logo" className="h-8 w-8 relative z-10" />
           </div>
-          <span className="text-[19px] font-extrabold text-white tracking-wide" style={{ textShadow: "0 0 15px rgba(255,255,255,0.3)" }}>
+          <span className="text-[19px] font-extrabold text-foreground dark:text-white tracking-wide" style={{ textShadow: "0 0 15px rgba(255,255,255,0.3)" }}>
             PlantCare AI
           </span>
         </motion.div>
 
-        <div className="pointer-events-auto">
+        <div className="pointer-events-auto flex items-center gap-4">
+          <ThemeToggle />
           <MagneticButton onClick={() => navigate("/login")}>
-            <div className="px-7 py-2.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl font-semibold text-white/90 hover:bg-white/10 hover:text-white transition-colors shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+            <div className="px-7 py-2.5 rounded-full bg-foreground/5 dark:bg-white/5 border border-border dark:border-white/10 backdrop-blur-xl font-semibold text-foreground dark:text-white/90 hover:bg-foreground/10 dark:hover:bg-white/10 transition-colors shadow-[0_0_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(255,255,255,0.05)]">
               Login
             </div>
           </MagneticButton>
@@ -332,20 +246,15 @@ const Index = () => {
         
         {/* Top Hero Content */}
         <div className="flex flex-col items-center text-center max-w-5xl w-full mb-16">
-          <h1 className="text-6xl sm:text-7xl md:text-[6rem] lg:text-[7.5rem] font-black tracking-tighter leading-[1.1] mb-6">
-            <div className="block mb-2 drop-shadow-2xl">
-              <SparkleTextReveal text="Smart Balcony" />
-            </div>
-            
-            {/* Liquid Gradient Text */}
+          <h1 className="text-6xl sm:text-7xl md:text-[6rem] lg:text-[8rem] font-black tracking-tighter leading-[1.1] mb-6">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 1, type: "spring" }}
-              className="inline-block"
+              className="inline-block drop-shadow-2xl"
             >
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff88] via-[#00f0ff] to-[#00ff88] bg-[length:200%_auto] animate-liquid-gradient drop-shadow-lg">
-                System
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff88] via-[#00f0ff] to-[#00ff88] bg-[length:200%_auto] animate-liquid-gradient">
+                MISTBOX
               </span>
             </motion.div>
           </h1>
@@ -354,17 +263,243 @@ const Index = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.2, duration: 1 }}
-            className="text-lg sm:text-xl text-white/50 max-w-2xl font-medium leading-relaxed"
+            className="text-lg sm:text-xl text-muted-foreground dark:text-white/50 max-w-2xl font-medium leading-relaxed"
           >
             The apex of horticultural intelligence. Seamlessly merging IoT sensors, 
             neural vision diagnostics, and hyper-automated irrigation.
           </motion.p>
         </div>
 
-        {/* Hyper-Interactive Bento Cards */}
-        <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+        {/* MISTBOX Product Marquee (Full Width) */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5, duration: 1 }}
+          className="w-screen max-w-none mb-24"
+        >
+          <div className="w-full overflow-hidden flex relative group/marquee py-6 bg-accent/30 dark:bg-white/[0.02] border-y border-border dark:border-white/[0.05] backdrop-blur-sm">
+            <motion.div 
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ duration: 25, ease: "linear", repeat: Infinity }}
+              className="flex flex-nowrap group-hover/marquee:[animation-play-state:paused]"
+            >
+              {[1, 2, 3, 4, 5, 1, 2, 3, 4, 5].map((num, idx) => (
+                <div key={idx} className="w-[280px] sm:w-[400px] md:w-[600px] flex-shrink-0 relative aspect-video rounded-2xl overflow-hidden bg-zinc-200 dark:bg-zinc-900 border border-black/10 dark:border-white/10 mx-3 sm:mx-4 group">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
+                  <img 
+                    src={`/images/mistbox-${num}.jpeg`} 
+                    alt={`MISTBOX Setup ${num}`}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </motion.div>
+        
+        {/* Mist Sprayer Video Demo */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.7, duration: 1 }}
+          className="w-full max-w-5xl mb-24 px-4 sm:px-12"
+        >
+          <div className="relative aspect-video rounded-3xl overflow-hidden border border-border dark:border-white/10 shadow-[0_0_40px_rgba(0,255,136,0.15)] mb-6">
+            <video 
+              autoPlay
+              controls 
+              loop 
+              muted 
+              playsInline 
+              className="w-full h-full object-cover bg-zinc-900/50"
+              src="/mist-sprayer.mp4"
+            >
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <div className="text-center">
+            <span className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-accent/30 dark:bg-zinc-900/40 backdrop-blur-md border border-border dark:border-white/10 font-medium text-sm text-foreground dark:text-white shadow-sm">
+              Mist Sprayer Action
+            </span>
+          </div>
+        </motion.div>
+
+        {/* Parts Description Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.8, duration: 1 }}
+          className="w-full max-w-4xl mb-24 px-4 sm:px-12"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left relative">
+            {/* Background blur highlight */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-md bg-[#00ff88]/5 blur-[100px] pointer-events-none rounded-full"></div>
+            
+            <div className="relative z-10">
+              <h2 className="text-2xl font-heading font-bold mb-6 flex items-center gap-3">
+                <div className="w-1.5 h-8 rounded-full bg-[#00ff88] shadow-[0_0_15px_rgba(0,255,136,0.5)]"></div>
+                Hardware Setup
+              </h2>
+              <div className="space-y-4">
+                <div className="bg-accent/30 dark:bg-white/[0.02] border border-border dark:border-white/[0.05] rounded-2xl p-5 transition-colors hover:border-[#00ff88]/20 group">
+                  <h3 className="text-lg font-bold text-foreground dark:text-white mb-2 flex items-center gap-2 group-hover:text-[#00ff88] transition-colors">
+                    <span className="text-[#00ff88] font-mono text-sm opacity-50">01</span> Core Controller
+                  </h3>
+                  <p className="text-sm text-muted-foreground dark:text-white/50 leading-relaxed">The brain of MISTBOX. This powerful ESP32 microcontroller handles Wi-Fi communications, sensor data processing, and coordinates the autonomous functions.</p>
+                </div>
+                <div className="bg-accent/30 dark:bg-white/[0.02] border border-border dark:border-white/[0.05] rounded-2xl p-5 transition-colors hover:border-[#00ff88]/20 group">
+                  <h3 className="text-lg font-bold text-foreground dark:text-white mb-2 flex items-center gap-2 group-hover:text-[#00ff88] transition-colors">
+                    <span className="text-[#00ff88] font-mono text-sm opacity-50">02</span> DHT11 Sensor
+                  </h3>
+                  <p className="text-sm text-muted-foreground dark:text-white/50 leading-relaxed">Monitors ambient temperature and humidity in real-time, providing crucial climate data to ensure optimal growing conditions.</p>
+                </div>
+                <div className="bg-accent/30 dark:bg-white/[0.02] border border-border dark:border-white/[0.05] rounded-2xl p-5 transition-colors hover:border-[#00ff88]/20 group">
+                  <h3 className="text-lg font-bold text-foreground dark:text-white mb-2 flex items-center gap-2 group-hover:text-[#00ff88] transition-colors">
+                    <span className="text-[#00ff88] font-mono text-sm opacity-50">03</span> Mist Pump Module
+                  </h3>
+                  <p className="text-sm text-muted-foreground dark:text-white/50 leading-relaxed">A high-efficiency micro water pump connected via a dedicated relay, providing precise irrigation based on real-time soil telemetry.</p>
+                </div>
+              </div>
+            </div>
+            <div className="pt-0 md:pt-14 space-y-4 relative z-10">
+              <div className="bg-accent/30 dark:bg-white/[0.02] border border-border dark:border-white/[0.05] rounded-2xl p-5 transition-colors hover:border-[#00ff88]/20 group">
+                <h3 className="text-lg font-bold text-foreground dark:text-white mb-2 flex items-center gap-2 group-hover:text-[#00ff88] transition-colors">
+                  <span className="text-[#00ff88] font-mono text-sm opacity-50">04</span> MQ135 Air Quality Sensor
+                </h3>
+                <p className="text-sm text-muted-foreground dark:text-white/50 leading-relaxed">Continuously analyzes environmental gases to determine the Air Quality Index (AQI), warning you of harmful atmospheric conditions.</p>
+              </div>
+              <div className="bg-accent/30 dark:bg-white/[0.02] border border-border dark:border-white/[0.05] rounded-2xl p-5 transition-colors hover:border-[#00ff88]/20 group">
+                <h3 className="text-lg font-bold text-foreground dark:text-white mb-2 flex items-center gap-2 group-hover:text-[#00ff88] transition-colors">
+                  <span className="text-[#00ff88] font-mono text-sm opacity-50">05</span> HW-080 Soil Probe
+                </h3>
+                <p className="text-sm text-muted-foreground dark:text-white/50 leading-relaxed">Sub-surface moisture telemetry sensor that detects precise hydration levels, ensuring your plants only get water when they truly need it.</p>
+              </div>
+              <div className="bg-accent/30 dark:bg-white/[0.02] border border-border dark:border-white/[0.05] rounded-2xl p-5 transition-colors hover:border-[#00ff88]/20 group">
+                <h3 className="text-lg font-bold text-foreground dark:text-white mb-2 flex items-center gap-2 group-hover:text-[#00ff88] transition-colors">
+                  <span className="text-[#00ff88] font-mono text-sm opacity-50">06</span> LED Indicator Array
+                </h3>
+                <p className="text-sm text-muted-foreground dark:text-white/50 leading-relaxed">Instantly read the system state without a screen. Blue (Pump Active), Yellow (Low Moisture), Red (Alert/Disease), and Green (AQI Status).</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Business Model Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.9, duration: 1 }}
+          className="w-full max-w-5xl mb-24 px-4 sm:px-12"
+        >
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-heading font-bold mb-4">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff88] to-[#00f0ff]">Business Model</span> & Economics
+            </h2>
+            <p className="text-muted-foreground dark:text-white/50 max-w-2xl mx-auto">
+              Disrupting the agritech landscape with an ultra-affordable hardware ecosystem powered by a high-value SaaS subscription.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Pricing Breakdown */}
+            <div className="bg-accent/30 dark:bg-zinc-900/40 border border-border dark:border-white/10 rounded-3xl p-8 backdrop-blur-md">
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                Hardware BOM <Badge variant="secondary" className="bg-[#00ff88]/10 text-[#00ff88] border-none ml-2">Ultra-Low Cost</Badge>
+              </h3>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center border-b border-border/50 dark:border-white/5 pb-3">
+                  <span className="text-muted-foreground dark:text-white/70">ESP32 Core Controller</span>
+                  <span className="font-mono font-medium">~₹350</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-border/50 dark:border-white/5 pb-3">
+                  <span className="text-muted-foreground dark:text-white/70">DHT11 (Temp/Humidity)</span>
+                  <span className="font-mono font-medium">~₹120</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-border/50 dark:border-white/5 pb-3">
+                  <span className="text-muted-foreground dark:text-white/70">MQ135 (Air Quality)</span>
+                  <span className="font-mono font-medium">~₹160</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-border/50 dark:border-white/5 pb-3">
+                  <span className="text-muted-foreground dark:text-white/70">HW-080 (Soil Probe)</span>
+                  <span className="font-mono font-medium">~₹80</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-border/50 dark:border-white/5 pb-3">
+                  <span className="text-muted-foreground dark:text-white/70">Mist Pump & Relay</span>
+                  <span className="font-mono font-medium">~₹400</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-border/50 dark:border-white/5 pb-3">
+                  <span className="text-muted-foreground dark:text-white/70">PCB & Enclosure</span>
+                  <span className="font-mono font-medium">~₹490</span>
+                </div>
+                <div className="flex justify-between items-center pt-2">
+                  <span className="font-bold text-lg">Total Cost to Build</span>
+                  <span className="font-mono font-bold text-xl text-[#00ff88]">~₹1,600</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Business Plan */}
+            <div className="flex flex-col gap-6">
+              <div className="bg-accent/30 dark:bg-zinc-900/40 border border-border dark:border-white/10 rounded-3xl p-8 backdrop-blur-md flex-1">
+                <h3 className="text-xl font-bold mb-4">The Strategy</h3>
+                <p className="text-sm text-muted-foreground dark:text-white/60 leading-relaxed mb-6">
+                  We operate on a "Razor and Blades" model. By keeping the barrier to entry extremely low with affordable hardware, we rapidly capture market share across B2C (home gardeners) and B2B (commercial greenhouses). The true revenue engine is our PlantCare AI+ software subscription.
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl bg-background/50 border border-border/50 dark:border-white/5">
+                    <div className="text-xs text-muted-foreground mb-1">Retail Price</div>
+                    <div className="text-2xl font-bold text-foreground dark:text-white">₹3,999</div>
+                    <div className="text-[10px] text-[#00ff88] mt-1">+60% Hardware Margin</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-[#00ff88]/10 border border-[#00ff88]/20">
+                    <div className="text-xs text-muted-foreground mb-1 dark:text-white/70">SaaS Subscription</div>
+                    <div className="text-2xl font-bold text-[#00ff88]">₹399<span className="text-sm font-normal">/mo</span></div>
+                    <div className="text-[10px] text-[#00ff88] mt-1">~90% Software Margin</div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-accent/30 dark:bg-zinc-900/40 border border-border dark:border-white/10 rounded-3xl p-6 backdrop-blur-md flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold">PlantCare AI+ Features</h4>
+                  <p className="text-xs text-muted-foreground dark:text-white/50 mt-1">Unlimited disease scans & predictive yield analytics</p>
+                </div>
+                <div className="h-10 w-10 rounded-full bg-background border border-border flex items-center justify-center shadow-lg">
+                  <ArrowRight className="h-4 w-4 text-[#00ff88]" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Future Enhancements & Novelty */}
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+            <div className="bg-accent/20 dark:bg-zinc-900/30 border border-border dark:border-white/5 rounded-3xl p-8 backdrop-blur-md hover:border-[#00ff88]/30 transition-colors">
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <div className="w-1.5 h-6 rounded-full bg-[#00ff88]"></div>
+                Novelty & Widespread Usage
+              </h3>
+              <p className="text-sm text-muted-foreground dark:text-white/60 leading-relaxed">
+                Existing agritech solutions often focus narrowly on a single plant or restrictive environment. We are building a product designed for infinite scalability—whether it's deployed in commercial nurseries or sprawling home gardens. Our modular approach means the Auto Watering system and the AQI/Sprinkler system can function completely independently, or assemble together to enable a widespread, robust agricultural usage model for multiple plants simultaneously.
+              </p>
+            </div>
+            
+            <div className="bg-accent/20 dark:bg-zinc-900/30 border border-border dark:border-white/5 rounded-3xl p-8 backdrop-blur-md hover:border-[#00ff88]/30 transition-colors">
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <div className="w-1.5 h-6 rounded-full bg-[#00ff88]"></div>
+                Future Enhancements
+              </h3>
+              <ul className="text-sm text-muted-foreground dark:text-white/60 leading-relaxed space-y-3">
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 text-[#00ff88] shrink-0 mt-0.5" /> <span><strong>Mesh Networking:</strong> Deploy dozens of MISTBOX nodes that communicate with each other over localized mesh networks.</span></li>
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 text-[#00ff88] shrink-0 mt-0.5" /> <span><strong>Drone Integration:</strong> Automated aerial disease scanning syncing directly with ground-level MISTBOX irrigation logic.</span></li>
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 text-[#00ff88] shrink-0 mt-0.5" /> <span><strong>Advanced Spectrometry:</strong> Integration of hyper-spectral cameras for early-stage nutrient deficiency detection.</span></li>
+              </ul>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Sleek Feature Buttons */}
+        <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
           {features.map((feat, i) => (
-            <BentoCard 
+            <SleekFeatureButton 
               key={feat.title}
               {...feat}
               delay={1.5 + (i * 0.15)}

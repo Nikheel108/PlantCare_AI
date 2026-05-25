@@ -31,7 +31,7 @@ export default function Profile() {
         title: "Logged out successfully",
         description: "See you soon! Keep your plants healthy.",
       });
-      navigate("/login");
+      navigate("/");
     } catch (error) {
       toast({
         title: "Logout failed",

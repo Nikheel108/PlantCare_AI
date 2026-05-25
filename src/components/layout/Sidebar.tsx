@@ -54,7 +54,7 @@ export function Sidebar() {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate("/login");
+      navigate("/");
     } catch (e) {
       console.error("Logout error", e);
     }
@@ -63,7 +63,7 @@ export function Sidebar() {
   const sidebarContent = (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-4 py-5 border-b border-white/[0.04]">
+      <div className="flex items-center gap-2.5 px-4 py-5 border-b border-border dark:border-white/[0.04]">
         <img src={plantLogo} alt="PlantCare AI" className="h-8 w-8 flex-shrink-0" />
         <AnimatePresence>
           {!collapsed && (
@@ -89,7 +89,7 @@ export function Sidebar() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="text-[10px] font-semibold tracking-[0.15em] text-white/20 uppercase px-3 mb-2"
+                  className="text-[10px] font-semibold tracking-[0.15em] text-muted-foreground dark:text-white/20 uppercase px-3 mb-2"
                 >
                   {section.label}
                 </motion.p>
@@ -104,7 +104,7 @@ export function Sidebar() {
                   className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                     isActive(item.href)
                       ? "bg-neon-green/[0.08] text-neon-green"
-                      : "text-white/40 hover:text-white/70 hover:bg-white/[0.03]"
+                      : "text-muted-foreground dark:text-white/40 hover:text-foreground dark:hover:text-white/70 hover:bg-accent dark:hover:bg-white/[0.03]"
                   }`}
                 >
                   {isActive(item.href) && (
@@ -116,7 +116,7 @@ export function Sidebar() {
                     />
                   )}
                   <item.icon className={`h-[18px] w-[18px] flex-shrink-0 transition-colors duration-200 ${
-                    isActive(item.href) ? "text-neon-green" : "text-white/30 group-hover:text-white/60"
+                    isActive(item.href) ? "text-neon-green" : "text-muted-foreground dark:text-white/30 group-hover:text-foreground dark:group-hover:text-white/60"
                   }`} />
                   <AnimatePresence>
                     {!collapsed && (
@@ -138,7 +138,7 @@ export function Sidebar() {
       </nav>
 
       {/* ESP Status */}
-      <div className="px-3 py-2 mx-2 mb-2 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+      <div className="px-3 py-2 mx-2 mb-2 rounded-xl bg-accent/50 dark:bg-white/[0.02] border border-border dark:border-white/[0.04]">
         <div className="flex items-center gap-2">
           <span
             className={`w-2 h-2 rounded-full flex-shrink-0 ${
@@ -153,7 +153,7 @@ export function Sidebar() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="text-xs text-white/25"
+                className="text-xs text-foreground dark:text-white/25"
               >
                 ESP {online ? "Connected" : "Offline"}
               </motion.span>
@@ -163,7 +163,7 @@ export function Sidebar() {
       </div>
 
       {/* User profile */}
-      <div className="border-t border-white/[0.04] px-3 py-3">
+      <div className="border-t border-border dark:border-white/[0.04] px-3 py-3">
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => navigate("/profile")}
@@ -173,7 +173,7 @@ export function Sidebar() {
               {currentUser?.photoURL && (
                 <AvatarImage src={currentUser.photoURL} alt={currentUser.displayName || ""} />
               )}
-              <AvatarFallback className="bg-gradient-to-br from-neon-green to-green-600 text-surface-0 text-xs font-bold">
+              <AvatarFallback className="bg-gradient-to-br from-neon-green to-green-600 text-white dark:text-surface-0 text-xs font-bold">
                 {currentUser?.displayName
                   ? currentUser.displayName.charAt(0).toUpperCase()
                   : <User className="h-3.5 w-3.5" />}
@@ -188,10 +188,10 @@ export function Sidebar() {
                 exit={{ opacity: 0, width: 0 }}
                 className="flex-1 min-w-0 overflow-hidden"
               >
-                <p className="text-xs font-medium text-white/70 truncate">
+                <p className="text-xs font-medium text-foreground dark:text-white/70 truncate">
                   {currentUser?.displayName || "User"}
                 </p>
-                <p className="text-[10px] text-white/25 truncate">
+                <p className="text-[10px] text-muted-foreground dark:text-white/25 truncate">
                   {currentUser?.email}
                 </p>
               </motion.div>
@@ -204,7 +204,7 @@ export function Sidebar() {
                   variant="ghost"
                   size="icon"
                   onClick={handleLogout}
-                  className="h-7 w-7 text-white/20 hover:text-red-400 hover:bg-red-500/10"
+                  className="h-7 w-7 text-muted-foreground dark:text-white/20 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10"
                 >
                   <LogOut className="h-3.5 w-3.5" />
                 </Button>
@@ -217,7 +217,7 @@ export function Sidebar() {
       {/* Collapse toggle — desktop only */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="hidden lg:flex items-center justify-center py-2.5 border-t border-white/[0.04] text-white/15 hover:text-white/40 transition-colors"
+        className="hidden lg:flex items-center justify-center py-2.5 border-t border-border dark:border-white/[0.04] text-muted-foreground dark:text-white/15 hover:text-foreground dark:hover:text-white/40 transition-colors"
       >
         {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
       </button>
@@ -229,7 +229,7 @@ export function Sidebar() {
       {/* Mobile toggle */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-xl bg-surface-1/90 backdrop-blur-xl border border-white/[0.06] text-white/50 hover:text-white/80"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-xl bg-background/90 dark:bg-surface-1/90 backdrop-blur-xl border border-border dark:border-white/[0.06] text-foreground dark:text-white/50 hover:text-foreground dark:hover:text-white/80"
         aria-label="Open menu"
       >
         <LayoutDashboard className="h-5 w-5" />
@@ -250,7 +250,7 @@ export function Sidebar() {
 
       {/* Sidebar */}
       <motion.aside
-        className={`fixed lg:sticky top-0 left-0 z-40 h-screen bg-surface-1/70 backdrop-blur-2xl border-r border-white/[0.04] flex-shrink-0 transition-all duration-300 ${
+        className={`fixed lg:sticky top-0 left-0 z-40 h-screen bg-background/70 dark:bg-surface-1/70 backdrop-blur-2xl border-r border-border dark:border-white/[0.04] flex-shrink-0 transition-all duration-300 ${
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
         style={{ width: collapsed ? 68 : 240 }}

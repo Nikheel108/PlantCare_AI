@@ -19,11 +19,14 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { EspProvider } from "./contexts/EspContext";
 import { PageTransition } from "./components/ui/PageTransition";
 
+import { ThemeProvider } from "./components/theme-provider";
+
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
+  <ThemeProvider defaultTheme="dark" attribute="class">
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -49,7 +52,8 @@ const App = () => (
         </EspProvider>
       </TooltipProvider>
     </AuthProvider>
-  </QueryClientProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;

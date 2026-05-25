@@ -30,11 +30,11 @@ export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
         onClick={onClick}
         className={cn(
           "rounded-2xl p-6",
-          "bg-white/[0.03] backdrop-blur-xl",
-          "border border-white/[0.06]",
-          "shadow-[0_8px_32px_rgba(0,0,0,0.3),0_0_20px_rgba(0,230,118,0.05)]",
+          "bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl",
+          "border border-black/[0.05] dark:border-white/[0.06]",
+          "shadow-sm dark:shadow-[0_8px_32px_rgba(0,0,0,0.3),0_0_20px_rgba(0,230,118,0.05)]",
           "transition-all duration-300",
-          hover && "cursor-pointer hover:border-[rgba(0,230,118,0.25)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.4),0_0_30px_rgba(0,230,118,0.12)]",
+          hover && "cursor-pointer hover:border-[rgba(0,230,118,0.25)] hover:shadow-md dark:hover:shadow-[0_12px_40px_rgba(0,0,0,0.4),0_0_30px_rgba(0,230,118,0.12)]",
           glow && "animate-glow-pulse",
           onClick && "cursor-pointer",
           className

@@ -73,16 +73,16 @@ export default function DiseaseDetection() {
     } finally { setIsAnalyzing(false); }
   };
 
-  const formatText = (t: string) => { if (!t) return null; return t.split(/(\*\*.*?\*\*)/g).map((p, i) => p.startsWith("**") && p.endsWith("**") ? <strong key={i} className="font-bold text-white">{p.slice(2, -2)}</strong> : p); };
+  const formatText = (t: string) => { if (!t) return null; return t.split(/(\*\*.*?\*\*)/g).map((p, i) => p.startsWith("**") && p.endsWith("**") ? <strong key={i} className="font-bold text-foreground dark:text-white">{p.slice(2, -2)}</strong> : p); };
   const sevColor = (s: string) => s === "Severe" ? "text-red-400" : s === "Moderate" ? "text-yellow-400" : s === "Mild" ? "text-orange-400" : "text-neon-green";
 
   return (
     <DashboardLayout particles="leaf">
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-white mb-1">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground dark:text-white mb-1">
           Plant <span className="text-neon">Disease Detection</span>
         </h1>
-        <p className="text-sm text-white/35">Upload a photo for <strong className="text-white/55">AI-powered disease analysis</strong></p>
+        <p className="text-sm text-muted-foreground dark:text-white/35">Upload a photo for <strong className="text-foreground dark:text-white/55">AI-powered disease analysis</strong></p>
       </motion.div>
 
       {/* API Key */}
@@ -90,10 +90,10 @@ export default function DiseaseDetection() {
         {showApiKeyInput && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="mb-4">
             <GlassCard hover={false} className="border-yellow-500/10">
-              <p className="text-sm font-heading font-semibold text-white mb-2">Gemini API Key Required</p>
-              <p className="text-xs text-white/30 mb-3">Get a free key from <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-neon-green hover:underline">Google AI Studio</a></p>
+              <p className="text-sm font-heading font-semibold text-foreground dark:text-white mb-2">Gemini API Key Required</p>
+              <p className="text-xs text-muted-foreground dark:text-white/30 mb-3">Get a free key from <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-neon-green hover:underline">Google AI Studio</a></p>
               <div className="flex flex-col sm:flex-row gap-2">
-                <Input type="password" placeholder="Enter API key" value={apiKey} onChange={(e) => setApiKey(e.target.value)} className="flex-1 h-10 bg-white/[0.04] border-white/[0.06] text-white placeholder:text-white/20 text-sm" />
+                <Input type="password" placeholder="Enter API key" value={apiKey} onChange={(e) => setApiKey(e.target.value)} className="flex-1 h-10 bg-background dark:bg-white/[0.04] border-border dark:border-white/[0.06] text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/20 text-sm" />
                 <Button onClick={() => { if (apiKey.trim()) { setShowApiKeyInput(false); setError(null); } }} disabled={!apiKey.trim()} className="btn-neon h-10">Save</Button>
               </div>
             </GlassCard>
@@ -115,25 +115,25 @@ export default function DiseaseDetection() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {/* Upload */}
         <GlassCard delay={0.1}>
-          <h3 className="text-sm font-heading font-semibold text-white mb-4 flex items-center gap-2"><Camera className="h-4 w-4 text-neon-green" />Image Upload</h3>
+          <h3 className="text-sm font-heading font-semibold text-foreground dark:text-white mb-4 flex items-center gap-2"><Camera className="h-4 w-4 text-neon-green" />Image Upload</h3>
           {!selectedImage ? (
-            <div className={`border-2 border-dashed rounded-xl p-6 sm:p-8 text-center transition-all duration-200 ${dragActive ? "border-neon-green/40 bg-neon-green/[0.03]" : "border-white/[0.06] hover:border-neon-green/20 hover:bg-white/[0.01]"}`} onDrop={handleDrop} onDragOver={(e) => e.preventDefault()} onDragEnter={() => setDragActive(true)} onDragLeave={() => setDragActive(false)}>
-              <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}><Upload className="h-10 w-10 text-white/15 mx-auto mb-3" /></motion.div>
-              <p className="text-sm font-heading font-medium text-white/50 mb-1">Drop your plant image here</p>
-              <p className="text-xs text-white/20 mb-4">or click to browse</p>
+            <div className={`border-2 border-dashed rounded-xl p-6 sm:p-8 text-center transition-all duration-200 ${dragActive ? "border-neon-green/40 bg-neon-green/[0.03]" : "border-border dark:border-white/[0.06] hover:border-neon-green/20 hover:bg-accent dark:hover:bg-white/[0.01]"}`} onDrop={handleDrop} onDragOver={(e) => e.preventDefault()} onDragEnter={() => setDragActive(true)} onDragLeave={() => setDragActive(false)}>
+              <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}><Upload className="h-10 w-10 text-muted-foreground dark:text-white/15 mx-auto mb-3" /></motion.div>
+              <p className="text-sm font-heading font-medium text-foreground dark:text-white/50 mb-1">Drop your plant image here</p>
+              <p className="text-xs text-muted-foreground dark:text-white/20 mb-4">or click to browse</p>
               <Button onClick={() => fileInputRef.current?.click()} className="btn-neon px-5 h-10">Choose Image</Button>
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-              <p className="text-[10px] text-white/15 mt-3">Supports JPG, PNG, WEBP up to 10MB</p>
+              <p className="text-[10px] text-muted-foreground dark:text-white/15 mt-3">Supports JPG, PNG, WEBP up to 10MB</p>
             </div>
           ) : (
             <div className="relative">
-              <div className="relative overflow-hidden rounded-xl border border-white/[0.06]">
+              <div className="relative overflow-hidden rounded-xl border border-border dark:border-white/[0.06]">
                 <img src={selectedImage} alt="Selected plant" className="w-full h-48 sm:h-56 object-cover" />
                 {isAnalyzing && <motion.div className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-neon-green to-transparent" animate={{ top: ["0%", "100%", "0%"] }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }} />}
               </div>
               <Button variant="destructive" size="icon" className="absolute top-3 right-3 h-8 w-8 rounded-lg bg-red-500/70 backdrop-blur-sm" onClick={clearImage}><X className="h-3.5 w-3.5" /></Button>
               {!result && !isAnalyzing && <Button onClick={analyzeImage} className="w-full btn-neon mt-4 min-h-[44px]" size="lg"><Camera className="mr-2 h-4 w-4" />Analyze Plant Health</Button>}
-              {isAnalyzing && <div className="mt-4 space-y-2"><div className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin text-neon-green" /><span className="text-xs text-white/40">Analyzing with <strong className="text-white/60">Gemini AI</strong>...</span></div><Progress value={65} className="h-1.5 progress-neon" /></div>}
+              {isAnalyzing && <div className="mt-4 space-y-2"><div className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin text-neon-green" /><span className="text-xs text-muted-foreground dark:text-white/40">Analyzing with <strong className="text-foreground dark:text-white/60">Gemini AI</strong>...</span></div><Progress value={65} className="h-1.5 progress-neon" /></div>}
               {isSaving && <div className="mt-4 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin text-neon-green" /><span className="text-xs text-neon-green">Uploading and sending email...</span></div>}
             </div>
           )}
@@ -141,9 +141,9 @@ export default function DiseaseDetection() {
 
         {/* Results */}
         <GlassCard delay={0.15}>
-          <h3 className="text-sm font-heading font-semibold text-white mb-4 flex items-center gap-2"><CheckCircle className="h-4 w-4 text-neon-green" />Analysis Results</h3>
+          <h3 className="text-sm font-heading font-semibold text-foreground dark:text-white mb-4 flex items-center gap-2"><CheckCircle className="h-4 w-4 text-neon-green" />Analysis Results</h3>
           {!result && !isAnalyzing && (
-            <div className="text-center py-10"><motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity }}><Info className="h-10 w-10 text-white/10 mx-auto mb-3" /></motion.div><p className="text-xs text-white/25">Upload an image to see results</p></div>
+            <div className="text-center py-10"><motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity }}><Info className="h-10 w-10 text-muted-foreground dark:text-white/10 mx-auto mb-3" /></motion.div><p className="text-xs text-muted-foreground dark:text-white/25">Upload an image to see results</p></div>
           )}
           <AnimatePresence>
             {result && (
@@ -151,12 +151,12 @@ export default function DiseaseDetection() {
                 {/* Diagnosis */}
                 <motion.div initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-heading font-semibold text-white/50">Diagnosis</p>
-                    <Badge className={`text-[10px] border ${result.confidence === "High" ? "bg-neon-green/10 text-neon-green border-neon-green/20" : result.confidence === "Medium" ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" : "bg-white/5 text-white/40 border-white/10"}`}>{result.confidence} Confidence</Badge>
+                    <p className="text-xs font-heading font-semibold text-muted-foreground dark:text-white/50">Diagnosis</p>
+                    <Badge className={`text-[10px] border ${result.confidence === "High" ? "bg-neon-green/10 text-neon-green border-neon-green/20" : result.confidence === "Medium" ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" : "bg-foreground/5 dark:bg-white/5 text-muted-foreground dark:text-white/40 border-border dark:border-white/10"}`}>{result.confidence} Confidence</Badge>
                   </div>
-                  <div className="bg-white/[0.02] rounded-xl p-3 border border-white/[0.04]">
-                    <p className="text-base font-heading font-bold text-white mb-1">{result.diseaseName}</p>
-                    <p className="text-xs text-white/35 mb-2">{formatText(result.description)}</p>
+                  <div className="bg-background dark:bg-white/[0.02] rounded-xl p-3 border border-border dark:border-white/[0.04]">
+                    <p className="text-base font-heading font-bold text-foreground dark:text-white mb-1">{result.diseaseName}</p>
+                    <p className="text-xs text-muted-foreground dark:text-white/35 mb-2">{formatText(result.description)}</p>
                     <div className="flex items-center gap-1.5"><AlertTriangle className={`h-3 w-3 ${sevColor(result.severity)}`} /><span className={`text-xs font-semibold ${sevColor(result.severity)}`}>Severity: {result.severity}</span></div>
                   </div>
                 </motion.div>
@@ -167,29 +167,29 @@ export default function DiseaseDetection() {
                   { title: "Possible Causes", items: result.causes, icon: Info, iconColor: "text-blue-400", delay: 0.3 },
                 ].map((sec) => sec.items?.length > 0 && (
                   <motion.div key={sec.title} initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: sec.delay }}>
-                    <p className="text-xs font-heading font-semibold text-white/50 mb-2">{sec.title}</p>
-                    <ul className="space-y-1.5">{sec.items.map((item, i) => <li key={i} className="flex items-start gap-2"><sec.icon className={`h-3 w-3 ${sec.iconColor} mt-0.5 flex-shrink-0`} /><span className="text-xs text-white/40">{formatText(item)}</span></li>)}</ul>
+                    <p className="text-xs font-heading font-semibold text-muted-foreground dark:text-white/50 mb-2">{sec.title}</p>
+                    <ul className="space-y-1.5">{sec.items.map((item, i) => <li key={i} className="flex items-start gap-2"><sec.icon className={`h-3 w-3 ${sec.iconColor} mt-0.5 flex-shrink-0`} /><span className="text-xs text-muted-foreground dark:text-white/40">{formatText(item)}</span></li>)}</ul>
                   </motion.div>
                 ))}
 
                 {result.treatment?.length > 0 && (
                   <motion.div initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
-                    <p className="text-xs font-heading font-semibold text-white/50 mb-2">Treatment</p>
-                    <ul className="space-y-1.5">{result.treatment.map((s, i) => <li key={i} className="flex items-start gap-2"><div className="w-4.5 h-4.5 bg-neon-green/10 text-neon-green rounded-full flex items-center justify-center text-[9px] font-bold mt-0.5 flex-shrink-0 border border-neon-green/20">{i + 1}</div><span className="text-xs text-white/40">{formatText(s)}</span></li>)}</ul>
+                    <p className="text-xs font-heading font-semibold text-muted-foreground dark:text-white/50 mb-2">Treatment</p>
+                    <ul className="space-y-1.5">{result.treatment.map((s, i) => <li key={i} className="flex items-start gap-2"><div className="w-4.5 h-4.5 bg-neon-green/10 text-neon-green rounded-full flex items-center justify-center text-[9px] font-bold mt-0.5 flex-shrink-0 border border-neon-green/20">{i + 1}</div><span className="text-xs text-muted-foreground dark:text-white/40">{formatText(s)}</span></li>)}</ul>
                   </motion.div>
                 )}
 
                 {result.prevention?.length > 0 && (
                   <motion.div initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
-                    <p className="text-xs font-heading font-semibold text-white/50 mb-2">Prevention</p>
-                    <ul className="space-y-1.5">{result.prevention.map((t, i) => <li key={i} className="flex items-start gap-2"><CheckCircle className="h-3 w-3 text-neon-green mt-0.5 flex-shrink-0" /><span className="text-xs text-white/40">{formatText(t)}</span></li>)}</ul>
+                    <p className="text-xs font-heading font-semibold text-muted-foreground dark:text-white/50 mb-2">Prevention</p>
+                    <ul className="space-y-1.5">{result.prevention.map((t, i) => <li key={i} className="flex items-start gap-2"><CheckCircle className="h-3 w-3 text-neon-green mt-0.5 flex-shrink-0" /><span className="text-xs text-muted-foreground dark:text-white/40">{formatText(t)}</span></li>)}</ul>
                   </motion.div>
                 )}
 
                 {result.additionalNotes && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="bg-blue-500/[0.04] border border-blue-500/10 rounded-xl p-3">
-                    <p className="text-[11px] font-heading font-semibold text-white/50 mb-1 flex items-center gap-1"><Info className="h-3 w-3 text-blue-400" />Additional Notes</p>
-                    <p className="text-xs text-white/35">{formatText(result.additionalNotes)}</p>
+                    <p className="text-[11px] font-heading font-semibold text-muted-foreground dark:text-white/50 mb-1 flex items-center gap-1"><Info className="h-3 w-3 text-blue-400" />Additional Notes</p>
+                    <p className="text-xs text-muted-foreground dark:text-white/35">{formatText(result.additionalNotes)}</p>
                   </motion.div>
                 )}
 
@@ -202,6 +202,27 @@ export default function DiseaseDetection() {
           </AnimatePresence>
         </GlassCard>
       </div>
+
+      {/* Hardware Setup */}
+      <GlassCard delay={0.2} className="mt-4 lg:mt-6 border-border dark:border-white/[0.05]">
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="w-full md:w-1/3 aspect-video relative rounded-xl overflow-hidden border border-border dark:border-white/10 bg-zinc-200 dark:bg-zinc-900">
+            <img src="/images/mistbox-1.jpeg" alt="MISTBOX Setup" className="w-full h-full object-cover" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-heading font-bold text-foreground dark:text-white mb-2">MISTBOX Hardware: Disease Alerts</h3>
+            <p className="text-sm text-muted-foreground dark:text-white/60 leading-relaxed mb-4">
+              Watch the physical MISTBOX unit for real-time plant health feedback:
+            </p>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-3 bg-background dark:bg-white/[0.02] p-2 rounded-lg border border-border dark:border-white/[0.03]">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)] animate-pulse" />
+                <span className="text-sm text-foreground dark:text-white/80"><strong>Red LED</strong> pulses rapidly to alert you when a severe disease is detected.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </GlassCard>
     </DashboardLayout>
   );
 }

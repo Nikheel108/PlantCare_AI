@@ -68,22 +68,22 @@ export default function AutoWatering() {
     <DashboardLayout particles="water">
       <div className="relative h-full min-h-[70vh]">
         {!online && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-md rounded-2xl bg-black/40 border border-white/5">
-            <div className="text-center p-8 bg-black/60 border border-white/10 rounded-3xl max-w-sm backdrop-blur-xl shadow-2xl">
+          <div className="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-md rounded-2xl bg-background/40 dark:bg-black/40 border border-border dark:border-white/5">
+            <div className="text-center p-8 bg-background/80 dark:bg-black/60 border border-border dark:border-white/10 rounded-3xl max-w-sm backdrop-blur-xl shadow-2xl">
               <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-3">ESP is Offline</h2>
-              <p className="text-white/60 text-sm">Please connect or power on your ESP device to view and control the auto-watering system.</p>
+              <h2 className="text-2xl font-bold text-foreground dark:text-white mb-3">ESP is Offline</h2>
+              <p className="text-muted-foreground dark:text-white/60 text-sm">Please connect or power on your ESP device to view and control the auto-watering system.</p>
             </div>
           </div>
         )}
         <div className={`transition-all duration-300 ${!online ? "opacity-30 blur-md pointer-events-none" : ""}`}>
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-white mb-1">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground dark:text-white mb-1">
           Auto-Watering <span className="text-neon">System</span>
         </h1>
-        <p className="text-sm text-white/35">
-          Monitor soil moisture and control <strong className="text-white/55">irrigation automatically</strong>
+        <p className="text-sm text-muted-foreground dark:text-white/35">
+          Monitor soil moisture and control <strong className="text-foreground dark:text-white/55">irrigation automatically</strong>
         </p>
       </motion.div>
 
@@ -240,6 +240,31 @@ export default function AutoWatering() {
           </div>
         </GlassCard>
       </div>
+
+      {/* Hardware Setup */}
+      <GlassCard delay={0.5} className="mt-4 border-white/[0.05]">
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="w-full md:w-1/3 aspect-video relative rounded-xl overflow-hidden border border-white/10 bg-zinc-900">
+            <img src="/images/mistbox-1.jpeg" alt="MISTBOX Setup" className="w-full h-full object-cover" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-heading font-bold text-white mb-2">MISTBOX Hardware: Auto-Watering</h3>
+            <p className="text-sm text-white/60 leading-relaxed mb-4">
+              Watch the physical MISTBOX unit for real-time operation feedback:
+            </p>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-3 bg-white/[0.02] p-2 rounded-lg border border-white/[0.03]">
+                <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)] animate-pulse" />
+                <span className="text-sm text-white/80"><strong>Blue LED</strong> indicates the mist pump is currently active.</span>
+              </li>
+              <li className="flex items-center gap-3 bg-white/[0.02] p-2 rounded-lg border border-white/[0.03]">
+                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.8)]" />
+                <span className="text-sm text-white/80"><strong>Yellow LED</strong> illuminates when soil moisture is critically low.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </GlassCard>
         </div>
       </div>
     </DashboardLayout>

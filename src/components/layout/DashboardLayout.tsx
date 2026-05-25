@@ -11,7 +11,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, particles = "default" }: DashboardLayoutProps) {
   return (
-    <div className="flex min-h-screen bg-surface-0">
+    <div className="flex min-h-screen bg-background text-foreground">
       <ParticleBackground variant={particles} />
       <Sidebar />
       <main className="flex-1 relative z-10 overflow-y-auto">

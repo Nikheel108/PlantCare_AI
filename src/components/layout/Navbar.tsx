@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useEsp } from "@/contexts/EspContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import plantLogo from "@/assets/plant-logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -28,7 +29,7 @@ export function Navbar() {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate("/login");
+      navigate("/");
     } catch (error) {
       console.error("Logout error", error);
     }
@@ -37,11 +38,11 @@ export function Navbar() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="sticky top-0 z-50 bg-surface-0/80 backdrop-blur-2xl border-b border-white/[0.06]">
+    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-2xl border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center">
+          {/* Logo & Theme Toggle */}
+          <div className="flex items-center gap-4">
             <Link
               to="/dashboard"
               className="flex items-center gap-2.5 group"
@@ -55,6 +56,7 @@ export function Navbar() {
                 PlantCare AI
               </span>
             </Link>
+            <ThemeToggle />
           </div>
 
           {/* Desktop Nav */}
@@ -66,7 +68,7 @@ export function Navbar() {
                 className={`relative px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                   isActive(item.href)
                     ? "text-neon"
-                    : "text-white/50 hover:text-white/90 hover:bg-white/[0.04]"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 }`}
               >
                 {item.name}
@@ -106,7 +108,7 @@ export function Navbar() {
               variant="ghost"
               size="icon"
               onClick={() => navigate("/profile")}
-              className="text-white/50 hover:text-white hover:bg-white/[0.06] min-w-[44px] min-h-[44px] rounded-xl"
+              className="text-muted-foreground hover:text-foreground hover:bg-accent min-w-[44px] min-h-[44px] rounded-xl"
               aria-label="View profile"
             >
               <Avatar className="h-8 w-8">
@@ -128,7 +130,7 @@ export function Navbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden text-white/60 hover:text-white hover:bg-white/[0.06] min-w-[44px] min-h-[44px]"
+              className="lg:hidden text-muted-foreground hover:text-foreground hover:bg-accent min-w-[44px] min-h-[44px]"
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle menu"
               aria-expanded={isOpen}
@@ -161,8 +163,8 @@ export function Navbar() {
                       onClick={() => setIsOpen(false)}
                       className={`block px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 min-h-[44px] flex items-center ${
                         isActive(item.href)
-                          ? "text-neon bg-white/[0.04]"
-                          : "text-white/50 hover:text-white hover:bg-white/[0.04]"
+                          ? "text-neon bg-accent"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
                       }`}
                     >
                       {item.name}
@@ -176,7 +178,7 @@ export function Navbar() {
                       setIsOpen(false);
                       handleLogout();
                     }}
-                    className="w-full justify-start px-4 py-3 text-base font-medium text-white/40 hover:text-white hover:bg-white/[0.04] min-h-[44px] rounded-xl"
+                    className="w-full justify-start px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent min-h-[44px] rounded-xl"
                   >
                     <LogOut className="h-5 w-5 mr-2" />
                     Logout

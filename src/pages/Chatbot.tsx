@@ -171,7 +171,7 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
     const parts = text.split(/(\*\*.*?\*\*)/g);
     return parts.map((part, index) => {
       if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={index} className="font-bold">{part.slice(2, -2)}</strong>;
+        return <strong key={index} className="font-bold text-foreground dark:text-white">{part.slice(2, -2)}</strong>;
       }
       return part;
     });
@@ -187,35 +187,35 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
   return (
     <DashboardLayout>
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-white mb-1">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground dark:text-white mb-1">
           Plant <span className="text-neon">Assistant</span>
         </h1>
-        <p className="text-sm text-white/35">
-          Get expert advice powered by <strong className="text-white/55">Google Gemini AI</strong>
+        <p className="text-sm text-muted-foreground dark:text-white/35">
+          Get expert advice powered by <strong className="text-foreground dark:text-white/55">Google Gemini AI</strong>
         </p>
       </motion.div>
 
         {/* API Key Input */}
         {showApiKeyInput && (
           <GlassCard hover={false} className="mb-4 border-yellow-500/10">
-            <p className="text-sm font-heading font-semibold text-white mb-2">Gemini API Key Required</p>
-            <p className="text-xs text-white/30 mb-3">Get a free key from <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-neon-green hover:underline">Google AI Studio</a></p>
+            <p className="text-sm font-heading font-semibold text-foreground dark:text-white mb-2">Gemini API Key Required</p>
+            <p className="text-xs text-muted-foreground dark:text-white/30 mb-3">Get a free key from <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-neon-green hover:underline">Google AI Studio</a></p>
             <div className="flex flex-col sm:flex-row gap-2">
-              <Input type="password" placeholder="Enter API key" value={apiKey} onChange={(e) => setApiKey(e.target.value)} className="flex-1 h-10 bg-white/[0.04] border-white/[0.06] text-white placeholder:text-white/20" />
+              <Input type="password" placeholder="Enter API key" value={apiKey} onChange={(e) => setApiKey(e.target.value)} className="flex-1 h-10 bg-background dark:bg-white/[0.04] border-border dark:border-white/[0.06] text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/20" />
               <Button onClick={() => { if (apiKey.trim()) setShowApiKeyInput(false); }} disabled={!apiKey.trim()} className="btn-neon h-10">Save</Button>
             </div>
           </GlassCard>
         )}
 
-        <div className="glass rounded-2xl border border-white/[0.04] flex flex-col" style={{ height: 'calc(100vh - 250px)', minHeight: '500px', maxHeight: '700px' }}>
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
+        <div className="glass rounded-2xl border border-border dark:border-white/[0.04] flex flex-col" style={{ height: 'calc(100vh - 250px)', minHeight: '500px', maxHeight: '700px' }}>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border dark:border-white/[0.04]">
             <div className="flex items-center gap-2">
               <Bot className="h-4 w-4 text-neon-green" />
-              <span className="text-sm font-heading font-semibold text-white">PlantCare Assistant</span>
+              <span className="text-sm font-heading font-semibold text-foreground dark:text-white">PlantCare Assistant</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-neon-green shadow-[0_0_6px_rgba(0,230,118,0.6)]" />
-              <span className="text-[10px] text-white/25">Online</span>
+              <span className="text-[10px] text-muted-foreground dark:text-white/25">Online</span>
             </div>
           </div>
 
@@ -229,7 +229,7 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
                     }`}
                 >
                   <Avatar className="w-8 h-8 flex-shrink-0">
-                    <AvatarFallback className={message.sender === 'bot' ? 'bg-neon-green/20 text-neon-green' : 'bg-white/10 text-white/60'}>
+                    <AvatarFallback className={message.sender === 'bot' ? 'bg-neon-green/20 text-neon-green' : 'bg-muted-foreground/20 dark:bg-white/10 text-foreground dark:text-white/60'}>
                       {message.sender === 'bot' ? (
                         <Bot className="h-4 w-4" />
                       ) : (
@@ -241,19 +241,19 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
                   <div className={`max-w-[85%] sm:max-w-[80%] ${message.sender === 'user' ? 'text-right' : ''}`}>
                     <div
                       className={`rounded-xl px-3 sm:px-4 py-2.5 ${message.sender === 'user'
-                        ? 'bg-neon-green/15 text-white ml-auto border border-neon-green/10'
-                        : 'bg-white/[0.03] text-white/70 border border-white/[0.04]'
+                        ? 'bg-neon-green text-surface-0 ml-auto border border-neon-green/10'
+                        : 'bg-background dark:bg-white/[0.03] text-foreground dark:text-white/70 border border-border dark:border-white/[0.04]'
                         }`}
                     >
                       {message.sender === 'bot' ? (
-                        <div className="text-xs sm:text-sm whitespace-pre-wrap space-y-2 text-white/60">
+                        <div className="text-xs sm:text-sm whitespace-pre-wrap space-y-2 text-foreground dark:text-white/60">
                           {formatText(message.text)}
                         </div>
                       ) : (
-                        <p className="text-xs sm:text-sm">{message.text}</p>
+                        <p className="text-xs sm:text-sm font-medium">{message.text}</p>
                       )}
                     </div>
-                    <span className="text-[10px] text-white/15 mt-1 block">
+                    <span className="text-[10px] text-muted-foreground dark:text-white/15 mt-1 block">
                       {formatTime(message.timestamp)}
                     </span>
                   </div>
@@ -267,7 +267,7 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
                       <Bot className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
-                  <div className="bg-white/[0.03] rounded-xl px-3 sm:px-4 py-2.5 border border-white/[0.04]">
+                  <div className="bg-background dark:bg-white/[0.03] rounded-xl px-3 sm:px-4 py-2.5 border border-border dark:border-white/[0.04]">
                     <div className="flex space-x-1">
                       <div className="w-1.5 h-1.5 bg-neon-green/50 rounded-full animate-bounce"></div>
                       <div className="w-1.5 h-1.5 bg-neon-green/50 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -283,11 +283,11 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
 
           {/* Quick Questions */}
           {messages.length === 1 && (
-            <div className="px-3 sm:px-4 py-2 border-t border-white/[0.03] bg-white/[0.01]">
-              <p className="text-[10px] text-white/20 mb-2">Quick questions:</p>
+            <div className="px-3 sm:px-4 py-2 border-t border-border dark:border-white/[0.03] bg-background dark:bg-white/[0.01]">
+              <p className="text-[10px] text-muted-foreground dark:text-white/20 mb-2">Quick questions:</p>
               <div className="flex flex-wrap gap-1.5">
                 {quickQuestions.map((question, index) => (
-                  <button key={index} onClick={() => setInputMessage(question)} className="text-[11px] px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white/35 hover:text-neon-green hover:border-neon-green/20 transition-colors">
+                  <button key={index} onClick={() => setInputMessage(question)} className="text-[11px] px-2.5 py-1.5 rounded-lg bg-background dark:bg-white/[0.03] border border-border dark:border-white/[0.06] text-muted-foreground dark:text-white/35 hover:text-neon-green hover:border-neon-green/20 transition-colors">
                     {question}
                   </button>
                 ))}
@@ -296,16 +296,16 @@ Keep responses concise but helpful. Be conversational, not robotic.`;
           )}
 
           {/* Input Area */}
-          <div className="p-3 sm:p-4 border-t border-white/[0.04]">
+          <div className="p-3 sm:p-4 border-t border-border dark:border-white/[0.04]">
             <div className="flex gap-2">
-              <Input value={inputMessage} onChange={(e) => setInputMessage(e.target.value)} onKeyPress={handleKeyPress} placeholder="Ask me about plant care..." className="flex-1 h-10 bg-white/[0.04] border-white/[0.06] text-white placeholder:text-white/20" disabled={isTyping} />
+              <Input value={inputMessage} onChange={(e) => setInputMessage(e.target.value)} onKeyPress={handleKeyPress} placeholder="Ask me about plant care..." className="flex-1 h-10 bg-background dark:bg-white/[0.04] border-border dark:border-white/[0.06] text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/20" disabled={isTyping} />
               <Button onClick={handleSendMessage} disabled={!inputMessage.trim() || isTyping} className="btn-neon min-w-[44px] min-h-[40px]" aria-label="Send message">
                 <Send className="h-4 w-4" />
               </Button>
             </div>
             <div className="flex items-center justify-between mt-2">
-              <p className="text-[10px] text-white/15">Powered by PlantCare AI</p>
-              {!showApiKeyInput && <button onClick={() => setShowApiKeyInput(true)} className="text-[10px] text-white/15 hover:text-neon-green">Change Key</button>}
+              <p className="text-[10px] text-muted-foreground dark:text-white/15">Powered by PlantCare AI</p>
+              {!showApiKeyInput && <button onClick={() => setShowApiKeyInput(true)} className="text-[10px] text-muted-foreground dark:text-white/15 hover:text-neon-green">Change Key</button>}
             </div>
           </div>
         </div>

@@ -28,8 +28,8 @@ function AQIGauge({ value, max = 300 }: { value: number; max?: number }) {
         <motion.circle cx="100" cy="100" r="80" fill="none" stroke={st.color} strokeWidth="10" strokeLinecap="round" strokeDasharray={circ} initial={{ strokeDashoffset: circ }} animate={{ strokeDashoffset: off }} transition={{ duration: 1.2, ease: "easeOut" }} style={{ filter: `drop-shadow(0 0 6px ${st.color}40)` }} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl sm:text-4xl font-heading font-bold text-white"><AnimatedCounter target={value} duration={1.2} /></span>
-        <span className="text-[10px] text-white/25 mt-0.5">AQI</span>
+        <span className="text-3xl sm:text-4xl font-heading font-bold text-foreground dark:text-white"><AnimatedCounter target={value} duration={1.2} /></span>
+        <span className="text-[10px] text-muted-foreground dark:text-white/25 mt-0.5">AQI</span>
         <Badge className={`mt-1.5 text-[9px] border ${value <= 50 ? "bg-neon-green/10 text-neon-green border-neon-green/20" : value <= 100 ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" : value <= 150 ? "bg-orange-500/10 text-orange-400 border-orange-500/20" : value <= 200 ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-purple-500/10 text-purple-400 border-purple-500/20"}`}>{st.label}</Badge>
       </div>
     </div>
@@ -60,20 +60,20 @@ export default function AQI() {
     <DashboardLayout particles="air">
       <div className="relative h-full min-h-[70vh]">
         {!online && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-md rounded-2xl bg-black/40 border border-white/5">
-            <div className="text-center p-8 bg-black/60 border border-white/10 rounded-3xl max-w-sm backdrop-blur-xl shadow-2xl">
+          <div className="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-md rounded-2xl bg-background/40 dark:bg-black/40 border border-border dark:border-white/5">
+            <div className="text-center p-8 bg-background/80 dark:bg-black/60 border border-border dark:border-white/10 rounded-3xl max-w-sm backdrop-blur-xl shadow-2xl">
               <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-3">ESP is Offline</h2>
-              <p className="text-white/60 text-sm">Please connect or power on your ESP device to view real-time air quality data.</p>
+              <h2 className="text-2xl font-bold text-foreground dark:text-white mb-3">ESP is Offline</h2>
+              <p className="text-muted-foreground dark:text-white/60 text-sm">Please connect or power on your ESP device to view real-time air quality data.</p>
             </div>
           </div>
         )}
         <div className={`transition-all duration-300 ${!online ? "opacity-30 blur-md pointer-events-none" : ""}`}>
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-white mb-1">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground dark:text-white mb-1">
           Air Quality <span className="text-neon">Monitor</span>
         </h1>
-        <p className="text-sm text-white/35">Real-time <strong className="text-white/55">environmental monitoring</strong> and analysis</p>
+        <p className="text-sm text-muted-foreground dark:text-white/35">Real-time <strong className="text-foreground dark:text-white/55">environmental monitoring</strong> and analysis</p>
       </motion.div>
 
       {/* Gauge */}
@@ -148,6 +148,27 @@ export default function AQI() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Hardware Setup */}
+      <GlassCard delay={0.5} className="mt-4 border-white/[0.05]">
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="w-full md:w-1/3 aspect-video relative rounded-xl overflow-hidden border border-white/10 bg-zinc-900">
+            <img src="/images/mistbox-1.jpeg" alt="MISTBOX Setup" className="w-full h-full object-cover" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-heading font-bold text-white mb-2">MISTBOX Hardware: AQI Monitor</h3>
+            <p className="text-sm text-white/60 leading-relaxed mb-4">
+              Watch the physical MISTBOX unit for real-time environmental feedback:
+            </p>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-3 bg-white/[0.02] p-2 rounded-lg border border-white/[0.03]">
+                <div className="w-2.5 h-2.5 rounded-full bg-neon-green shadow-[0_0_10px_rgba(0,255,136,0.8)] animate-pulse" />
+                <span className="text-sm text-white/80"><strong>Green LED</strong> pulses to indicate healthy air quality and active monitoring.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </GlassCard>
         </div>
       </div>
     </DashboardLayout>
