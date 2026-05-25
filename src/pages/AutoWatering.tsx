@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Droplets, Power, Settings, TrendingUp, AlertTriangle, CheckCircle, Thermometer } from "lucide-react";
+import { Droplets, Power, Settings, TrendingUp, AlertTriangle, CheckCircle, Thermometer, Wind } from "lucide-react";
 import { motion } from "framer-motion";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
@@ -16,8 +16,11 @@ export default function AutoWatering() {
   const [soilMoisture, setSoilMoisture] = useState(45);
   const [isMistActive, setIsMistActive] = useState(false);
   const [pumpDuration, setPumpDuration] = useState(0);
-  const [lastWatering, setLastWatering] = useState("2 hours ago");
+  const [lastWatering, setLastWatering] = useState("Loading...");
+  const [dailyUsage, setDailyUsage] = useState("0L");
+  const [lastMistCycle, setLastMistCycle] = useState("Loading...");
   const [humidity, setHumidity] = useState(58);
+  const [moistureHistory, setMoistureHistory] = useState<number[]>(Array(12).fill(40));
 
   const { data, online } = useEsp();
 
@@ -53,7 +56,65 @@ export default function AutoWatering() {
     return () => clearInterval(timer);
   }, [isPumpActive, pumpDuration]);
 
+  const getTimeAgo = (date: Date) => {
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    if (seconds < 60) return "Just now";
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) return interval + " years ago";
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1) return interval + " months ago";
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) return interval + " days ago";
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) return interval + " hours ago";
+    interval = Math.floor(seconds / 60);
+    return interval + " mins ago";
+  };
 
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const BACKEND = (import.meta.env.VITE_BACKEND_URL || "").toString().trim();
+      if (!BACKEND) return;
+      try {
+        const res = await fetch(`${BACKEND}/api/sensors/esp-balcony-1`);
+        if (res.ok) {
+          const history = await res.json();
+          if (!history || history.length === 0) return;
+          
+          const lastPump = history.find((r: any) => r.isPumpActive || r.pumpActive === 1);
+          setLastWatering(lastPump ? getTimeAgo(new Date(lastPump.createdAt)) : "Never");
+          
+          const lastMist = history.find((r: any) => r.mistActive === true || r.mistActive === 1);
+          setLastMistCycle(lastMist ? getTimeAgo(new Date(lastMist.createdAt)) : "Never");
+          
+          const today = new Date();
+          today.setHours(0,0,0,0);
+          const todayRecords = history.filter((r: any) => {
+             const d = new Date(r.createdAt);
+             return d >= today && (r.isPumpActive || r.pumpActive === 1);
+          });
+          const liters = todayRecords.length * 0.25;
+          setDailyUsage(`${liters.toFixed(1)}L`);
+
+          // Moisture trend parsing
+          const trend = history
+            .filter((r: any) => typeof r.moisture === "number" || typeof r.soilPercent === "number")
+            .slice(0, 12)
+            .map((r: any) => Math.max(0, Math.min(100, Math.round(r.soilPercent || r.moisture))))
+            .reverse();
+          while (trend.length < 12) {
+             trend.unshift(trend.length > 0 ? trend[0] : 40);
+          }
+          setMoistureHistory(trend);
+        }
+      } catch (e) {
+        console.warn("Could not fetch history:", e);
+      }
+    };
+    fetchHistory();
+    const interval = setInterval(fetchHistory, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const getMoistureStatus = () => {
     if (soilMoisture < 30) return { status: "Low", badge: "bg-red-500/10 text-red-400 border-red-500/20" };
@@ -133,8 +194,8 @@ export default function AutoWatering() {
         </GlassCard>
       </div>
 
-      {/* Control + Pump + Chart row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      {/* Control + Pump + Mist + Chart row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         {/* Control Panel */}
         <GlassCard delay={0.25}>
           <div className="flex items-center gap-2 mb-5">
@@ -182,7 +243,41 @@ export default function AutoWatering() {
             {[
               { l: "Mode", v: isAutoMode ? "Auto" : "Manual" },
               { l: "Last Watering", v: lastWatering },
-              { l: "Daily Usage", v: "2.3L" },
+              { l: "Daily Usage", v: dailyUsage },
+            ].map((r) => (
+              <div key={r.l} className="flex justify-between text-xs border-b border-white/[0.03] pb-2 last:border-0">
+                <span className="text-white/25">{r.l}</span>
+                <span className="text-white/55 font-medium">{r.v}</span>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+
+        {/* Mist Status */}
+        <GlassCard delay={0.32} glow={isMistActive}>
+          <div className="flex items-center gap-2 mb-5">
+            <Wind className="h-4 w-4 text-white/30" />
+            <h3 className="text-sm font-heading font-semibold text-white">Mist Status</h3>
+          </div>
+          <div className="text-center mb-5">
+            <motion.div
+              animate={isMistActive ? { scale: [1, 1.05, 1] } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className={`w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center border-2 transition-all duration-500 ${
+                isMistActive
+                  ? "bg-cyan-500/[0.06] border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.2)]"
+                  : "bg-white/[0.02] border-white/[0.06]"
+              }`}
+            >
+              <Wind className={`h-8 w-8 ${isMistActive ? "text-cyan-400" : "text-white/15"}`} />
+            </motion.div>
+            <p className="text-base font-heading font-semibold text-white">{isMistActive ? "Active" : "Inactive"}</p>
+          </div>
+          <div className="space-y-2.5">
+            {[
+              { l: "Mode", v: isAutoMode ? "Auto" : "Manual" },
+              { l: "Target Humidity", v: "60%" },
+              { l: "Last Cycle", v: lastMistCycle },
             ].map((r) => (
               <div key={r.l} className="flex justify-between text-xs border-b border-white/[0.03] pb-2 last:border-0">
                 <span className="text-white/25">{r.l}</span>
@@ -199,19 +294,16 @@ export default function AutoWatering() {
             <h3 className="text-sm font-heading font-semibold text-white">Moisture History</h3>
           </div>
           <div className="grid grid-cols-12 gap-1 h-28 items-end mb-2">
-            {Array.from({ length: 12 }, (_, i) => {
-              const h = Math.random() * 60 + 20;
-              return (
-                <motion.div
-                  key={i}
-                  initial={{ height: 0 }}
-                  animate={{ height: `${h}%` }}
-                  transition={{ duration: 0.4, delay: i * 0.04 }}
-                  className="w-full rounded-t-sm"
-                  style={{ background: `linear-gradient(to top, rgba(0,230,118,0.1), rgba(0,230,118,${0.25 + h / 250}))` }}
-                />
-              );
-            })}
+            {moistureHistory.map((h, i) => (
+              <motion.div
+                key={i}
+                initial={{ height: 0 }}
+                animate={{ height: `${h}%` }}
+                transition={{ duration: 0.4, delay: i * 0.04 }}
+                className="w-full rounded-t-sm"
+                style={{ background: `linear-gradient(to top, rgba(0,230,118,0.1), rgba(0,230,118,${0.25 + h / 250}))` }}
+              />
+            ))}
           </div>
           <div className="flex justify-between text-[9px] text-white/15">
             {Array.from({ length: 7 }, (_, i) => <span key={i}>{i * 4}h</span>)}

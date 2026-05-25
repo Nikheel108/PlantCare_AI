@@ -157,7 +157,7 @@ const SleekFeatureButton = ({ icon: Icon, title, desc, delay, onClick }: any) =>
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5, ease: "easeOut" }}
       onClick={onClick}
-      className="group flex flex-col text-left w-full p-6 rounded-3xl bg-accent/30 dark:bg-zinc-900/40 backdrop-blur-md border border-border dark:border-white/10 hover:bg-accent/50 dark:hover:bg-zinc-800/60 transition-all duration-300 shadow-sm hover:shadow-md"
+      className="group flex flex-col text-left w-full p-5 sm:p-6 rounded-3xl bg-accent/30 dark:bg-zinc-900/40 backdrop-blur-md border border-border dark:border-white/10 hover:bg-accent/50 dark:hover:bg-zinc-800/60 transition-all duration-300 shadow-sm hover:shadow-md"
     >
       <div className="flex items-center justify-between w-full mb-4">
         <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-background/50 border border-border dark:border-white/5">
@@ -165,7 +165,7 @@ const SleekFeatureButton = ({ icon: Icon, title, desc, delay, onClick }: any) =>
         </div>
         <ArrowRight className="h-5 w-5 text-muted-foreground/30 group-hover:text-foreground dark:group-hover:text-white/80 group-hover:translate-x-1 transition-all duration-300" />
       </div>
-      <h3 className="text-xl font-heading font-bold text-foreground dark:text-white mb-2">
+      <h3 className="text-lg sm:text-xl font-heading font-bold text-foreground dark:text-white mb-2">
         {title}
       </h3>
       <p className="text-sm text-muted-foreground dark:text-white/60 leading-relaxed flex-1">
@@ -215,26 +215,26 @@ const Index = () => {
       <Background />
 
       {/* ═══ MAGNETIC NAVIGATION ═══ */}
-      <nav className="absolute top-0 z-50 w-full px-8 py-6 flex items-center justify-between pointer-events-none">
+      <nav className="absolute top-0 z-50 w-full px-5 sm:px-8 py-4 sm:py-6 flex items-center justify-between pointer-events-none">
         <motion.div 
           initial={{ opacity: 0, filter: "blur(10px)" }}
           animate={{ opacity: 1, filter: "blur(0px)" }}
           transition={{ duration: 1, ease: "easeOut" }}
-          className="flex items-center gap-3 pointer-events-auto"
+          className="flex items-center gap-2 sm:gap-3 pointer-events-auto"
         >
-          <div className="relative flex items-center justify-center">
+          <div className="relative flex items-center justify-center shrink-0">
             <div className="absolute inset-0 bg-[#00ff88] blur-2xl opacity-40 rounded-full" />
-            <img src={plantLogo} alt="Logo" className="h-8 w-8 relative z-10" />
+            <img src={plantLogo} alt="Logo" className="h-7 w-7 sm:h-8 sm:w-8 relative z-10 object-contain" />
           </div>
-          <span className="text-[19px] font-extrabold text-foreground dark:text-white tracking-wide" style={{ textShadow: "0 0 15px rgba(255,255,255,0.3)" }}>
+          <span className="text-[17px] sm:text-[19px] font-extrabold text-foreground dark:text-white tracking-wide shrink-0" style={{ textShadow: "0 0 15px rgba(255,255,255,0.3)" }}>
             PlantCare AI
           </span>
         </motion.div>
 
-        <div className="pointer-events-auto flex items-center gap-4">
+        <div className="pointer-events-auto flex items-center gap-3 sm:gap-4">
           <ThemeToggle />
           <MagneticButton onClick={() => navigate("/login")}>
-            <div className="px-7 py-2.5 rounded-full bg-foreground/5 dark:bg-white/5 border border-border dark:border-white/10 backdrop-blur-xl font-semibold text-foreground dark:text-white/90 hover:bg-foreground/10 dark:hover:bg-white/10 transition-colors shadow-[0_0_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+            <div className="px-5 sm:px-7 py-2 sm:py-2.5 rounded-full bg-foreground/5 dark:bg-white/5 border border-border dark:border-white/10 backdrop-blur-xl font-semibold text-sm sm:text-base text-foreground dark:text-white/90 hover:bg-foreground/10 dark:hover:bg-white/10 transition-colors shadow-[0_0_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(255,255,255,0.05)]">
               Login
             </div>
           </MagneticButton>
@@ -242,11 +242,11 @@ const Index = () => {
       </nav>
 
       {/* ═══ HERO & BENTO LAYOUT (max 100vh-120vh) ═══ */}
-      <main className="relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16 overflow-hidden">
+      <main className="relative z-10 w-full min-h-screen flex flex-col items-center justify-center pt-24 pb-16 overflow-hidden">
         
         {/* Top Hero Content */}
-        <div className="flex flex-col items-center text-center max-w-5xl w-full mb-16">
-          <h1 className="text-6xl sm:text-7xl md:text-[6rem] lg:text-[8rem] font-black tracking-tighter leading-[1.1] mb-6">
+        <div className="flex flex-col items-center text-center max-w-5xl w-full mb-16 px-6">
+          <h1 className="text-5xl sm:text-7xl md:text-[6rem] lg:text-[8rem] font-black tracking-tighter leading-[1.1] mb-6">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -302,7 +302,7 @@ const Index = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.7, duration: 1 }}
-          className="w-full max-w-5xl mb-24 px-4 sm:px-12"
+          className="w-full max-w-5xl mb-24 px-6 sm:px-12"
         >
           <div className="relative aspect-video rounded-3xl overflow-hidden border border-border dark:border-white/10 shadow-[0_0_40px_rgba(0,255,136,0.15)] mb-6">
             <video 
@@ -329,7 +329,7 @@ const Index = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.8, duration: 1 }}
-          className="w-full max-w-4xl mb-24 px-4 sm:px-12"
+          className="w-full max-w-4xl mb-24 px-6 sm:px-12"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left relative">
             {/* Background blur highlight */}
@@ -389,7 +389,7 @@ const Index = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.9, duration: 1 }}
-          className="w-full max-w-5xl mb-24 px-4 sm:px-12"
+          className="w-full max-w-5xl mb-24 px-6 sm:px-12"
         >
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-heading font-bold mb-4">
@@ -402,7 +402,7 @@ const Index = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Pricing Breakdown */}
-            <div className="bg-accent/30 dark:bg-zinc-900/40 border border-border dark:border-white/10 rounded-3xl p-8 backdrop-blur-md">
+            <div className="bg-accent/30 dark:bg-zinc-900/40 border border-border dark:border-white/10 rounded-3xl p-6 sm:p-8 backdrop-blur-md">
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                 Hardware BOM <Badge variant="secondary" className="bg-[#00ff88]/10 text-[#00ff88] border-none ml-2">Ultra-Low Cost</Badge>
               </h3>
@@ -440,30 +440,30 @@ const Index = () => {
 
             {/* Business Plan */}
             <div className="flex flex-col gap-6">
-              <div className="bg-accent/30 dark:bg-zinc-900/40 border border-border dark:border-white/10 rounded-3xl p-8 backdrop-blur-md flex-1">
+              <div className="bg-accent/30 dark:bg-zinc-900/40 border border-border dark:border-white/10 rounded-3xl p-6 sm:p-8 backdrop-blur-md flex-1">
                 <h3 className="text-xl font-bold mb-4">The Strategy</h3>
                 <p className="text-sm text-muted-foreground dark:text-white/60 leading-relaxed mb-6">
                   We operate on a "Razor and Blades" model. By keeping the barrier to entry extremely low with affordable hardware, we rapidly capture market share across B2C (home gardeners) and B2B (commercial greenhouses). The true revenue engine is our PlantCare AI+ software subscription.
                 </p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-2xl bg-background/50 border border-border/50 dark:border-white/5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl bg-background/50 border border-border/50 dark:border-white/5 flex flex-col justify-center">
                     <div className="text-xs text-muted-foreground mb-1">Retail Price</div>
                     <div className="text-2xl font-bold text-foreground dark:text-white">₹3,999</div>
                     <div className="text-[10px] text-[#00ff88] mt-1">+60% Hardware Margin</div>
                   </div>
-                  <div className="p-4 rounded-2xl bg-[#00ff88]/10 border border-[#00ff88]/20">
+                  <div className="p-4 rounded-2xl bg-[#00ff88]/10 border border-[#00ff88]/20 flex flex-col justify-center">
                     <div className="text-xs text-muted-foreground mb-1 dark:text-white/70">SaaS Subscription</div>
                     <div className="text-2xl font-bold text-[#00ff88]">₹399<span className="text-sm font-normal">/mo</span></div>
                     <div className="text-[10px] text-[#00ff88] mt-1">~90% Software Margin</div>
                   </div>
                 </div>
               </div>
-              <div className="bg-accent/30 dark:bg-zinc-900/40 border border-border dark:border-white/10 rounded-3xl p-6 backdrop-blur-md flex items-center justify-between">
+              <div className="bg-accent/30 dark:bg-zinc-900/40 border border-border dark:border-white/10 rounded-3xl p-5 sm:p-6 backdrop-blur-md flex items-center justify-between">
                 <div>
                   <h4 className="font-bold">PlantCare AI+ Features</h4>
                   <p className="text-xs text-muted-foreground dark:text-white/50 mt-1">Unlimited disease scans & predictive yield analytics</p>
                 </div>
-                <div className="h-10 w-10 rounded-full bg-background border border-border flex items-center justify-center shadow-lg">
+                <div className="h-10 w-10 rounded-full bg-background border border-border flex shrink-0 items-center justify-center shadow-lg ml-4">
                   <ArrowRight className="h-4 w-4 text-[#00ff88]" />
                 </div>
               </div>
@@ -471,8 +471,8 @@ const Index = () => {
           </div>
 
           {/* Future Enhancements & Novelty */}
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
-            <div className="bg-accent/20 dark:bg-zinc-900/30 border border-border dark:border-white/5 rounded-3xl p-8 backdrop-blur-md hover:border-[#00ff88]/30 transition-colors">
+          <div className="mt-8 sm:mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 text-left">
+            <div className="bg-accent/20 dark:bg-zinc-900/30 border border-border dark:border-white/5 rounded-3xl p-6 sm:p-8 backdrop-blur-md hover:border-[#00ff88]/30 transition-colors">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <div className="w-1.5 h-6 rounded-full bg-[#00ff88]"></div>
                 Novelty & Widespread Usage
@@ -482,7 +482,7 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="bg-accent/20 dark:bg-zinc-900/30 border border-border dark:border-white/5 rounded-3xl p-8 backdrop-blur-md hover:border-[#00ff88]/30 transition-colors">
+            <div className="bg-accent/20 dark:bg-zinc-900/30 border border-border dark:border-white/5 rounded-3xl p-6 sm:p-8 backdrop-blur-md hover:border-[#00ff88]/30 transition-colors">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <div className="w-1.5 h-6 rounded-full bg-[#00ff88]"></div>
                 Future Enhancements
@@ -497,7 +497,7 @@ const Index = () => {
         </motion.div>
 
         {/* Sleek Feature Buttons */}
-        <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+        <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 px-6 sm:px-12 mb-12">
           {features.map((feat, i) => (
             <SleekFeatureButton 
               key={feat.title}
